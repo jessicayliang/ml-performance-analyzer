@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tst-app
+  labels:
+    app: tst-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tst-app
+  template:
+    metadata:
+      labels:
+        app: tst-app
+    spec:
+      containers:
+        - name: tst-app
+          image: gcr.io/coms6998-term-project/tst-app:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
