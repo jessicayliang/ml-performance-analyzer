@@ -1,5 +1,6 @@
 import time
 from fastapi import FastAPI, Request, HTTPException
+from pydantic import BaseModel
 from starlette.responses import Response
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from app.llm_engine import generate_text
