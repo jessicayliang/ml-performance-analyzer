@@ -8,6 +8,8 @@ from app.metrics import *
 from app.monitoring import start_metrics_updater, update_resource_metrics
 from app.middleware import queue_simulation_middleware
 
+MAX_HISTORY_MESSAGES = 20
+
 app = FastAPI()
 app.middleware("http")(queue_simulation_middleware)
 
@@ -47,6 +49,12 @@ async def generate(request: PromptRequest):
 
         # Append model's response to the history
         history.append({"role": "assistant", "content": response_text})
+
+		# Truncate history before generating
+		if len(history) > MAX_HISTORY_MESSAGES:
+			system_prompt = [history[0]]
+			trimmed_history = history[1:][-MAX_HISTORY_MESSAGES:]  # trim after system
+			history = system_prompt + trimmed_history
 
         # Log metrics
         REQUEST_LATENCY.observe(time.time() - start_time)

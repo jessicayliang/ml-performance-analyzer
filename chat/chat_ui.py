@@ -6,7 +6,7 @@ API_URL = "http://localhost:8000/generate"
 
 # ---- Sidebar controls ----
 st.sidebar.title("Settings")
-user_id = st.sidebar.text_input("User ID", value="user1")
+user_id = st.sidebar.text_input("User ID", value="user-101")
 temperature = st.sidebar.slider("Temperature", min_value=0.0, max_value=1.0, value=0.7, step=0.05)
 top_p = st.sidebar.slider("Top-p", min_value=0.0, max_value=1.0, value=0.95, step=0.05)
 max_tokens = st.sidebar.slider("Max Tokens", min_value=16, max_value=1024, value=256, step=16)
@@ -15,7 +15,7 @@ max_tokens = st.sidebar.slider("Max Tokens", min_value=16, max_value=1024, value
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-st.title("🧠 Chat with Qwen")
+st.title("Chat with Qwen-0.5B")
 
 # ---- Display message history ----
 for msg in st.session_state.messages:
