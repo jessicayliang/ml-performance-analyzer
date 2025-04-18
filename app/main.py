@@ -9,23 +9,44 @@ from app.monitoring import start_metrics_updater, update_resource_metrics
 from app.middleware import queue_simulation_middleware
 
 app = FastAPI()
-
 app.middleware("http")(queue_simulation_middleware)
+
+# In-memory session store: user_id -> list of messages
+chat_histories = {}
 
 @app.post("/generate")
 async def generate(request: PromptRequest):
     start_time = time.time()
-    QUEUE_SIZE.dec()  # simulate removal from queue
+    QUEUE_SIZE.dec()
 
     try:
         ttft_start = time.time()
+
+        user_id = request.user_id
+        user_prompt = request.prompt
+
+        # Initialize chat history if not present
+        history = chat_histories.setdefault(user_id, [])
+
+        # Ensure a system prompt is at the start
+        if not any(m["role"] == "system" for m in history):
+            history.insert(0, {"role": "system", "content": "You are a helpful assistant."})
+
+        # Add current user message
+        history.append({"role": "user", "content": user_prompt})
+
+        # Generate assistant reply based on full history
         response_text, input_tokens, output_tokens = generate_text(
-            prompt=request.prompt,
+            messages=history,
             max_tokens=request.max_tokens,
             temperature=request.temperature,
             top_p=request.top_p
         )
+
         ttft_end = time.time()
+
+        # Append model's response to the history
+        history.append({"role": "assistant", "content": response_text})
 
         # Log metrics
         REQUEST_LATENCY.observe(time.time() - start_time)
@@ -37,7 +58,8 @@ async def generate(request: PromptRequest):
         TOKEN_LENGTH_OUTPUT.observe(len(output_tokens))
 
         update_resource_metrics()
-        return {"output": response_text}
+
+        return {"output": response_text, "messages": history}
 
     except Exception as e:
         ERROR_COUNT.inc()

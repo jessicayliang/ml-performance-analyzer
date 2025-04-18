@@ -19,7 +19,7 @@ python3 run.py
 
 // Run inference
 curl -X POST "http://localhost:8000/generate" -H "Content-Type: application/json" \
-    -d '{"prompt": "Explain how transformers work.", "max_tokens": 100}'
+    -d '{"prompt": "Explain how transformers work.", "max_tokens": 100, "user_id": "user_1"}'
 
 // View metrics
 curl "http://localhost:8000/metrics"
