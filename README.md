@@ -26,6 +26,8 @@ curl "http://localhost:8000/metrics"
 
 // Run Chat UI
 streamlit run chat/chat_ui.py
+// then, go to {EXTERNAL-IP}:8501
+// make sure firewall enables tcp port 8501
 
 ```
 
