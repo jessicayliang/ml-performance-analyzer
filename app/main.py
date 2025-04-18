@@ -59,7 +59,7 @@ async def generate(request: PromptRequest):
 
         update_resource_metrics()
 
-        return {"output": response_text, "messages": history}
+        return {"output": response_text}
 
     except Exception as e:
         ERROR_COUNT.inc()

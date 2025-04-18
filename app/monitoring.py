@@ -12,7 +12,7 @@ def update_resource_metrics():
         if gpus:
             GPU_MEMORY_USAGE.set(gpus[0].memoryUsed * 1024 * 1024)
     except Exception:
-        pass
+        print(f"Unexpected exception: {e}")
 
 def start_metrics_updater():
     def _loop():
