@@ -1,11 +1,12 @@
+import time
 from fastapi import FastAPI, Request
 from starlette.responses import Response
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
-from .models import PromptRequest
-from .llm_engine import generate_text
-from .metrics import *
-from .monitoring import start_metrics_updater, update_resource_metrics
-from .middleware import queue_simulation_middleware
+from app.models import PromptRequest
+from app.llm_engine import generate_text
+from app.metrics import *
+from app.monitoring import start_metrics_updater, update_resource_metrics
+from app.middleware import queue_simulation_middleware
 
 app = FastAPI()
 
