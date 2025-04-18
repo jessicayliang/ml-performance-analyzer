@@ -24,6 +24,9 @@ curl -X POST "http://localhost:8000/generate" -H "Content-Type: application/json
 // View metrics
 curl "http://localhost:8000/metrics"
 
+// Run Chat UI
+streamlit run chat/chat_ui.py
+
 ```
 
 ## Metrics Collected
