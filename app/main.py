@@ -1,12 +1,12 @@
 import time
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from starlette.responses import Response
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
-from app.models import PromptRequest
 from app.llm_engine import generate_text
 from app.metrics import *
 from app.monitoring import start_metrics_updater, update_resource_metrics
 from app.middleware import queue_simulation_middleware
+from app.throttling import is_throttled
 
 MAX_HISTORY_MESSAGES = 20
 
@@ -16,16 +16,26 @@ app.middleware("http")(queue_simulation_middleware)
 # In-memory session store: user_id -> list of messages
 chat_histories = {}
 
+class PromptRequest(BaseModel):
+    user_id: str
+    prompt: str
+    max_tokens: int = 256
+    temperature: float = 0.7
+    top_p: float = 0.95
+
 @app.post("/generate")
 async def generate(request: PromptRequest):
     start_time = time.time()
-    QUEUE_SIZE.dec()
 
     try:
         ttft_start = time.time()
 
         user_id = request.user_id
         user_prompt = request.prompt
+
+        # Check for throttling
+        if is_throttled(user_id):
+            raise HTTPException(status_code=429, detail="Too many requests. Please wait before trying again.")
 
         # Initialize chat history if not present
         history = chat_histories.setdefault(user_id, [])

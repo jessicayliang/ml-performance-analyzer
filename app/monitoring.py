@@ -2,7 +2,7 @@ import psutil
 import GPUtil
 import time
 import threading
-from .metrics import GPU_MEMORY_USAGE, CPU_USAGE_PERCENT, RAM_USAGE_BYTES
+from app.metrics import GPU_MEMORY_USAGE, CPU_USAGE_PERCENT, RAM_USAGE_BYTES
 
 def update_resource_metrics():
     CPU_USAGE_PERCENT.set(psutil.cpu_percent())

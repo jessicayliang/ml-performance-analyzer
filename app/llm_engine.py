@@ -4,7 +4,7 @@ from vllm import LLM, SamplingParams
 from transformers import AutoTokenizer
 
 MODEL_ID = "Qwen/Qwen2.5-0.5B-Instruct"
-HF_TOKEN = os.getenv("HF_TOKEN", None)
+HF_TOKEN = os.getenv("HF_TOKEN", None)  # only some gated models need HF_TOKEN
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, token=HF_TOKEN)
 llm = LLM(model=MODEL_ID, dtype=torch.float16)
