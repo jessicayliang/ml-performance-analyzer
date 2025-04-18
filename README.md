@@ -17,4 +17,8 @@ uvicorn app:app --host 0.0.0.0 --port 8000
 // Run inference
 curl -X POST "http://localhost:8000/generate" -H "Content-Type: application/json" \
     -d '{"prompt": "Explain how transformers work.", "max_tokens": 100}'
+    
+// View metrics
+curl "http://localhost:8000/metrics"
+
 ```
