@@ -143,3 +143,4 @@ xformers==0.0.29.post2
 xgrammar==0.1.18
 yarl==1.19.0
 zipp==3.21.0
+streamlit>=1.30.0
