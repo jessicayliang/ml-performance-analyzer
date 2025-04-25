@@ -8,27 +8,92 @@ Run inference
 
 ## Setup
 
+### Set up using Terraform (GKE cluster)
+
+1. Authenticate your Google Cloud Account
+
 ```
-// Set up
-git clone https://github.com/jessicayliang/ml-performance-analyzer.git
-cd ml-performance-analyzer
-python3 -m venv env
-source env/bin/activate
-pip install -r requirements.txt
-python3 run.py
+gcloud auth application-default login
+```
 
-// Run inference
+2. Build the Docker image and push to GCR
+
+```
+PROJECT_ID={your-gcp-project-id}
+docker build -t gcr.io/$PROJECT_ID/llm-inference:latest .
+gcloud auth configure-docker
+docker push gcr.io/$PROJECT_ID/llm-inference:latest
+```
+
+3. Install Terraform (for macOS)
+
+```
+brew tap hashicorp/tap
+brew install hashicorp/tap/terraform
+```
+
+4. Deploy cluster
+
+First, ensure that the `project_id`, `cluster_name`, `image_repository`, and `image_tag` variables are configured correctly in `terraform.tfvars`.
+
+Similarly, in `deploy.sh`, configure the correct values for `CLUSTER_NAME`, `ZONE`, and `PROJECT_ID`.
+
+If you want to redeploy your stack, first clean up your local terraform states:
+
+```
+rm -rf .terraform terraform.tfstate terraform.tfstate.backup
+```
+
+Next, build your stack:
+
+```
+cd infra
+terraform init
+bash deploy.sh
+```
+
+Wait until your cluster is set up. You can check the pods within the cluster by:
+
+```
+kubectl get pods
+kubectl logs <pod-name>
+```
+
+5. Test performing inference on the cluster
+
+```
+// Port-forward inference port
+kubectl port-forward svc/llm-monitoring 8000:8000
+
+// Run inference on external IP address
 curl -X POST "http://localhost:8000/generate" -H "Content-Type: application/json" \
-    -d '{"prompt": "Explain how transformers work.", "max_tokens": 100, "user_id": "user_1"}'
+ -d '{"prompt": "Explain how transformers work.", "max_tokens": 100, "user_id": "user_1"}'
 
-// View metrics
-curl "http://localhost:8000/metrics"
+// To view metrics collected, just go to http://localhost:8000/metrics
 
-// Run Chat UI
+```
+
+6. Open Grafana Dashboard
+
+```
+// Port-forward grafana port
+kubectl port-forward svc/llm-monitoring-grafana 8080:80
+```
+
+Now, just open http://localhost:8080/. You will need to obtain a password from the secret:
+
+```
+kubectl get secret llm-monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+```
+
+Use the username "admin", and the password decoded from the secret above.
+
+### Run Chat UI
+
+```
 streamlit run chat/chat_ui.py
 // then, go to {EXTERNAL-IP}:8501
 // make sure firewall enables tcp port 8501
-
 ```
 
 ## Metrics Collected
@@ -76,3 +141,7 @@ streamlit run chat/chat_ui.py
 `llm_queue_size`: Current size of the request queue.
 `llm_rate_limit_breaches_total`: Number of rate-limit breaches.
 `llm_throttling_incidents_total`: Number of throttling incidents.
+
+```
+
+```
