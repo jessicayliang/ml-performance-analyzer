@@ -36,6 +36,12 @@ brew install hashicorp/tap/terraform
 
 First, ensure that the `project_id`, `cluster_name`, `image_repository`, and `image_tag` variables are configured correctly in `terraform.tfvars`. Similarly, in `deploy.sh`, configure the correct values for `CLUSTER_NAME`, `ZONE`, and `PROJECT_ID`.
 
+Next, `cd` into the `infra` directory
+
+```
+cd infra
+```
+
 If you want to redeploy your stack, first clean up your local terraform states:
 
 ```
@@ -45,7 +51,6 @@ rm -rf .terraform terraform.tfstate terraform.tfstate.backup
 Next, build your stack:
 
 ```
-cd infra
 terraform init
 bash deploy.sh
 ```
