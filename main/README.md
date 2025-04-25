@@ -1,14 +1,14 @@
-# ml-performance-analyzer
+# ML Performance Analyzer
 
 Term project for coms6998 applied machine learning in the cloud
 
 A performance analysis framework for pre-trained ML models in cloud environments
 
-Run inference
+---
 
 ## Setup
 
-### Set up using Terraform (GKE cluster)
+### Deploy GKE Cluster using Terraform
 
 1. Authenticate your Google Cloud Account
 
@@ -34,9 +34,7 @@ brew install hashicorp/tap/terraform
 
 4. Deploy cluster
 
-First, ensure that the `project_id`, `cluster_name`, `image_repository`, and `image_tag` variables are configured correctly in `terraform.tfvars`.
-
-Similarly, in `deploy.sh`, configure the correct values for `CLUSTER_NAME`, `ZONE`, and `PROJECT_ID`.
+First, ensure that the `project_id`, `cluster_name`, `image_repository`, and `image_tag` variables are configured correctly in `terraform.tfvars`. Similarly, in `deploy.sh`, configure the correct values for `CLUSTER_NAME`, `ZONE`, and `PROJECT_ID`.
 
 If you want to redeploy your stack, first clean up your local terraform states:
 
@@ -68,10 +66,9 @@ kubectl port-forward svc/llm-monitoring 8000:8000
 // Run inference on external IP address
 curl -X POST "http://localhost:8000/generate" -H "Content-Type: application/json" \
  -d '{"prompt": "Explain how transformers work.", "max_tokens": 100, "user_id": "user_1"}'
-
-// To view metrics collected, just go to http://localhost:8000/metrics
-
 ```
+
+To view metrics collected, just go to http://localhost:8000/metrics
 
 6. Open Grafana Dashboard
 
@@ -87,14 +84,6 @@ kubectl get secret llm-monitoring-grafana -o jsonpath="{.data.admin-password}" |
 ```
 
 Use the username "admin", and the password decoded from the secret above.
-
-### Run Chat UI
-
-```
-streamlit run chat/chat_ui.py
-// then, go to {EXTERNAL-IP}:8501
-// make sure firewall enables tcp port 8501
-```
 
 ## Metrics Collected
 
