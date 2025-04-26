@@ -1,0 +1,10 @@
+transformers==4.51.3
+tokenizers==0.21.1
+gputil==1.4.0
+vllm==0.8.4
+triton==3.2.0
+fastapi==0.115.12
+uvicorn==0.34.1
+prometheus-fastapi-instrumentator==7.1.0
+prometheus_client==0.21.1
+tqdm==4.67.1
