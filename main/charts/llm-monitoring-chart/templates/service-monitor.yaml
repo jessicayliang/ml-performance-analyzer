@@ -1,17 +1,17 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: llm-monitoring-servicemonitor
+  name: {{ .Release.Name }}-servicemonitor
   labels:
-    release: prometheus
+    release: {{ .Release.Name }}
 spec:
   selector:
     matchLabels:
-      app: llm-monitoring
+      app: {{ .Release.Name }}
   endpoints:
     - port: http
       path: /metrics
       interval: 15s
   namespaceSelector:
     matchNames:
-      - default
+      - {{ .Release.Namespace }}

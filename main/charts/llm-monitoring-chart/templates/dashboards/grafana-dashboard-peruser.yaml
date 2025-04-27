@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: llm-peruser-dashboard
+    labels:
+        grafana_dashboard: "1"
+data:
+    llm-peruser-dashboard.json: |
+        {
+          "uid": "llm-peruser-dashboard",
+          "title": "LLM Metrics Per User",
+          "schemaVersion": 37,
+          "version": 2,
+          "templating": { "list": [ { "name": "user_id", "type": "query", "datasource": "Prometheus", "refresh": 1, "query": "label_values(llm_request_count_total, user_id)", "multi": true, "includeAll": true, "current": { "text": "All", "value": "$__all" }} ] },
+          "panels": [
+            { "title": "User Requests", "type": "timeseries", "fieldConfig": {"defaults": {"custom": {"axisLabel": "Requests"}}}, "targets": [ { "expr": "llm_request_count_total{user_id=~\"$user_id\"}" } ], "gridPos": {"x":0,"y":0,"w":12,"h":8} },
+            { "title": "User Request Latency", "type": "timeseries", "fieldConfig": {"defaults": {"unit": "s", "custom": {"axisLabel": "Latency"}}}, "targets": [ { "expr": "rate(llm_request_latency_seconds_sum{user_id=~\"$user_id\"}[1m]) / rate(llm_request_latency_seconds_count{user_id=~\"$user_id\"}[1m])" } ], "gridPos": {"x":12,"y":0,"w":12,"h":8} },
+            { "title": "User Tokens Generated", "type": "timeseries", "fieldConfig": {"defaults": {"unit": "tokens", "custom": {"axisLabel": "Tokens"}}}, "targets": [ { "expr": "increase(llm_tokens_generated_total{user_id=~\"$user_id\"}[5m])" } ], "gridPos": {"x":0,"y":8,"w":12,"h":8} },
+            { "title": "User Error Rate", "type": "timeseries", "fieldConfig": {"defaults": {"unit": "errors/s", "custom": {"axisLabel": "Errors per Second"}}}, "targets": [ { "expr": "rate(llm_error_count_total{user_id=~\"$user_id\"}[1m])" } ], "gridPos": {"x":12,"y":8,"w":12,"h":8} },
+            { "title": "User Rate Limit Breaches", "type": "timeseries", "fieldConfig": {"defaults": {"unit": "breaches/s", "custom": {"axisLabel": "Breaches per Second"}}}, "targets": [ { "expr": "rate(llm_rate_limit_breaches{user_id=~\"$user_id\"}[1m])" } ], "gridPos": {"x":0,"y":16,"w":24,"h":8} }
+          ]
+        }

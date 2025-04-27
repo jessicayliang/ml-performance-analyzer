@@ -78,17 +78,20 @@ To view metrics collected, just go to http://localhost:8000/metrics
 6. Open Grafana Dashboard
 
 ```
-// Port-forward grafana port
+// Port-forward Grafana web UI
 kubectl port-forward svc/llm-monitoring-grafana 8080:80
+
+// You can also port-forward Prometheus web UI
+kubectl port-forward svc/llm-monitoring-kube-promet-prometheus 9090:9090
 ```
 
-Now, just open http://localhost:8080/. You will need to obtain a password from the secret:
+Now, just open http://localhost:8080/ for Grafana Web UI, or http://localhost:9090 for Prometheus Web UI. You will need to obtain a password from the secret:
 
 ```
 kubectl get secret llm-monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 ```
 
-Use the username "admin", and the password decoded from the secret above.
+Use the username "admin", and the password decoded from the secret above. You can now navigate to the Dashboard menu to see the custom dashboards for our application.
 
 ## Metrics Collected
 

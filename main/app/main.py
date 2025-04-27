@@ -68,15 +68,13 @@ async def generate(request: PromptRequest):
             history = system_prompt + trimmed_history
 
         # Log metrics
-        REQUEST_LATENCY.observe(time.time() - start_time)
-        TIME_TO_FIRST_TOKEN.observe(ttft_end - ttft_start)
-        REQUEST_COUNT.inc()
-        TOKENS_INPUT.inc(len(input_tokens))
-        TOKENS_GENERATED.inc(len(output_tokens))
+        REQUEST_LATENCY.labels(user_id=user_id).observe(time.time() - start_time)
+        TIME_TO_FIRST_TOKEN.labels(user_id=user_id).observe(ttft_end - ttft_start)
+        REQUEST_COUNT.labels(user_id=user_id).inc()
+        TOKENS_INPUT.labels(user_id=user_id).inc(len(input_tokens))
+        TOKENS_GENERATED.labels(user_id=user_id).inc(len(output_tokens))
         TOKEN_LENGTH_INPUT.observe(len(input_tokens))
         TOKEN_LENGTH_OUTPUT.observe(len(output_tokens))
-
-        update_resource_metrics()
 
         return {"output": response_text}
 

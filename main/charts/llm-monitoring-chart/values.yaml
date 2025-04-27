@@ -27,3 +27,8 @@ kube-prometheus-stack:
         defaultDashboardsEnabled: true
         service:
             type: LoadBalancer
+        sidecar:
+            dashboards:
+                enabled: true
+                searchNamespace: default
+                waitForGrafana: true
