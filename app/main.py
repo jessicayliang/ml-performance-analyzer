@@ -9,7 +9,7 @@ from app.monitoring import start_metrics_updater, update_resource_metrics
 from app.middleware import queue_simulation_middleware
 from app.throttling import is_throttled
 
-MAX_HISTORY_MESSAGES = 20
+MAX_HISTORY_MESSAGES = 5
 
 app = FastAPI()
 app.middleware("http")(queue_simulation_middleware)
