@@ -1,0 +1,96 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "title": "Request Latency",
+      "type": "graph",
+      "datasource": "Prometheus",
+      "id": 1,
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(llm_request_latency_seconds_bucket[5m])) by (le))",
+          "legendFormat": "95th Percentile"
+        },
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(llm_request_latency_seconds_bucket[5m])) by (le))",
+          "legendFormat": "50th Percentile"
+        }
+      ]
+    },
+    {
+      "title": "Tokens Per Second",
+      "type": "graph",
+      "datasource": "Prometheus",
+      "id": 2,
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(llm_tokens_per_second_bucket[5m])) by (le))",
+          "legendFormat": "Tokens/sec"
+        }
+      ]
+    },
+    {
+      "title": "GPU Metrics",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "id": 3,
+      "targets": [
+        {
+          "expr": "llm_gpu_memory_usage_bytes",
+          "legendFormat": "Memory Usage"
+        },
+        {
+          "expr": "llm_gpu_utilization_percent",
+          "legendFormat": "GPU Utilization %"
+        },
+        {
+          "expr": "llm_gpu_temperature_celsius",
+          "legendFormat": "Temperature (C)"
+        }
+      ]
+    },
+    {
+      "title": "Cost Metrics",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "id": 4,
+      "targets": [
+        {
+          "expr": "sum(increase(llm_estimated_cost_dollars[24h]))",
+          "legendFormat": "24h Cost ($)"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 27,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "LLM Inference Metrics",
+  "uid": "llm-metrics",
+  "version": 1
+}

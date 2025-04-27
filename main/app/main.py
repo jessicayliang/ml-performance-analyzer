@@ -1,4 +1,5 @@
 import time
+from collections import defaultdict
 from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
 from starlette.responses import Response
@@ -17,6 +18,17 @@ app.middleware("http")(queue_simulation_middleware)
 # In-memory session store: user_id -> list of messages
 chat_histories = {}
 
+# Cost constants (example values)
+INPUT_TOKEN_COST = 0.0000015  # $0.0000015 per token
+OUTPUT_TOKEN_COST = 0.000002  # $0.000002 per token
+
+# Track active users and their session lengths
+active_users = set()
+user_message_counts = defaultdict(int)
+last_user_activity = {}
+MAX_CONTEXT_LENGTH = 4096  # Adjust based on your model's context window
+
+
 class PromptRequest(BaseModel):
     user_id: str
     prompt: str
@@ -30,9 +42,15 @@ async def generate(request: PromptRequest):
 
     try:
         ttft_start = time.time()
-
         user_id = request.user_id
         user_prompt = request.prompt
+
+        # Update user metrics
+        active_users.add(user_id)
+        user_message_counts[user_id] += 1
+        last_user_activity[user_id] = time.time()
+        UNIQUE_USERS.set(len(active_users))
+        USER_SESSION_LENGTH.observe(user_message_counts[user_id])
 
         # Check for throttling
         if is_throttled(user_id):
@@ -57,6 +75,22 @@ async def generate(request: PromptRequest):
         )
 
         ttft_end = time.time()
+
+        # After generating the response:
+        # Calculate context length utilization
+        total_context_length = len(input_tokens) + len(output_tokens)
+        context_utilization = total_context_length / MAX_CONTEXT_LENGTH
+        CONTEXT_LENGTH_UTILIZATION.observe(context_utilization)
+
+        # Calculate cost
+        input_cost = len(input_tokens) * INPUT_TOKEN_COST
+        output_cost = len(output_tokens) * OUTPUT_TOKEN_COST
+        total_cost = input_cost + output_cost
+
+        # Record cost metrics
+        ESTIMATED_COST.labels(model_id=MODEL_ID, operation_type="generate").inc(total_cost)
+        tokens_per_dollar = (len(input_tokens) + len(output_tokens)) / total_cost if total_cost > 0 else 0
+        TOKENS_PROCESSED_PER_DOLLAR.set(tokens_per_dollar)
 
         # Append model's response to the history
         history.append({"role": "assistant", "content": response_text})
@@ -93,4 +127,27 @@ def metrics():
 def health():
     return {"status": "Model is ready"}
 
-start_metrics_updater()
+# Add a background task to clean up inactive users (optional)
+def clean_inactive_users():
+    def _loop():
+        while True:
+            current_time = time.time()
+            inactive_threshold = 3600  # 1 hour
+
+            inactive_users = [
+                user_id for user_id, last_time in last_user_activity.items()
+                if current_time - last_time > inactive_threshold
+            ]
+
+            for user_id in inactive_users:
+                active_users.discard(user_id)
+                user_message_counts.pop(user_id, None)
+                last_user_activity.pop(user_id, None)
+
+            time.sleep(300)  # Check every 5 minutes
+
+    thread = threading.Thread(target=_loop, daemon=True)
+    thread.start()
+
+# Start the user cleanup task
+clean_inactive_users()
