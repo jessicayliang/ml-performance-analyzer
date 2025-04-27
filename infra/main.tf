@@ -52,7 +52,7 @@ resource "google_container_node_pool" "gpu_nodes" {
 
 resource "helm_release" "llm_monitoring" {
   name       = "llm-monitoring"
-  chart      = "../charts/llm-monitoring-chart"
+  chart      = "../helm_chart"
   namespace  = "default"
   create_namespace = true
   dependency_update = true
