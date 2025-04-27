@@ -10,13 +10,67 @@ data:
           "uid": "llm-global-dashboard",
           "title": "LLM Global Metrics",
           "schemaVersion": 37,
-          "version": 3,
+          "version": 2,
+          "tags": ["llm-monitoring"],
           "panels": [
-            { "title": "Total Requests", "type": "timeseries", "fieldConfig": {"defaults": {"custom": {"axisLabel": "Requests"}}}, "targets": [ { "expr": "sum(llm_request_count_total)" } ], "gridPos": {"x":0,"y":0,"w":12,"h":8} },
-            { "title": "Average Request Latency", "type": "timeseries", "fieldConfig": {"defaults": {"unit": "s", "custom": {"axisLabel": "Latency"}}}, "targets": [ { "expr": "sum(rate(llm_request_latency_seconds_sum[1m])) / sum(rate(llm_request_latency_seconds_count[1m]))" } ], "gridPos": {"x":12,"y":0,"w":12,"h":8} },
-            { "title": "Average Time to First Token", "type": "timeseries", "fieldConfig": {"defaults": {"unit": "s", "custom": {"axisLabel": "Time to First Token (s)"}}}, "targets": [ { "expr": "sum(rate(llm_time_to_first_token_seconds_sum[1m])) / sum(rate(llm_time_to_first_token_seconds_count[1m]))" } ], "gridPos": {"x":0,"y":8,"w":12,"h":8} },
-            { "title": "Tokens Generated", "type": "timeseries", "fieldConfig": {"defaults": {"unit": "tokens", "custom": {"axisLabel": "Tokens"}}}, "targets": [ { "expr": "sum(increase(llm_tokens_generated_total[5m]))" } ], "gridPos": {"x":12,"y":8,"w":12,"h":8} },
-            { "title": "Inference Error Rate", "type": "timeseries", "fieldConfig": {"defaults": {"unit": "errors/s", "custom": {"axisLabel": "Errors per Second"}}}, "targets": [ { "expr": "sum(rate(llm_error_count_total[1m]))" } ], "gridPos": {"x":0,"y":16,"w":12,"h":8} },
-            { "title": "Rate Limit Breaches", "type": "timeseries", "fieldConfig": {"defaults": {"unit": "breaches/s", "custom": {"axisLabel": "Breaches per Second"}}}, "targets": [ { "expr": "sum(rate(llm_rate_limit_breaches_total[1m]))" } ], "gridPos": {"x":12,"y":16,"w":12,"h":8} }
+            {
+              "title": "Total Requests (Last 5m)",
+              "type": "timeseries",
+              "fieldConfig": { "defaults": { "custom": { "axisLabel": "Requests" } } },
+              "targets": [ { "expr": "sum(increase(llm_request_count_total[5m]))" } ],
+              "gridPos": { "x":0, "y":0, "w":12, "h":8 }
+            },
+            {
+              "title": "Average Request Latency",
+              "type": "timeseries",
+              "fieldConfig": { "defaults": { "unit": "s", "custom": { "axisLabel": "Latency" } } },
+              "targets": [ { "expr": "sum(rate(llm_request_latency_seconds_sum[1m])) / sum(rate(llm_request_latency_seconds_count[1m]))" } ],
+              "gridPos": { "x":12, "y":0, "w":12, "h":8 }
+            },
+            {
+              "title": "Average Time to First Token",
+              "type": "timeseries",
+              "fieldConfig": { "defaults": { "unit": "s", "custom": { "axisLabel": "Time to First Token (s)" } } },
+              "targets": [ { "expr": "sum(rate(llm_time_to_first_token_seconds_sum[1m])) / sum(rate(llm_time_to_first_token_seconds_count[1m]))" } ],
+              "gridPos": { "x":0, "y":8, "w":12, "h":8 }
+            },
+            {
+              "title": "Tokens Generated (Last 5m)",
+              "type": "timeseries",
+              "fieldConfig": { "defaults": { "unit": "tokens", "custom": { "axisLabel": "Tokens" } } },
+              "targets": [ { "expr": "sum(increase(llm_tokens_generated_total[5m]))" } ],
+              "gridPos": { "x":12, "y":8, "w":12, "h":8 }
+            },
+            {
+              "title": "Inference Errors (Last 5m)",
+              "type": "timeseries",
+              "fieldConfig": { "defaults": { "unit": "errors", "custom": { "axisLabel": "Errors" } } },
+              "targets": [ { "expr": "sum(increase(llm_error_count_total[5m]))" } ],
+              "gridPos": { "x":0, "y":16, "w":12, "h":8 }
+            },
+            {
+              "title": "Num Limit Breaches (Last 5m)",
+              "type": "timeseries",
+              "fieldConfig": { "defaults": { "unit": "breaches", "custom": { "axisLabel": "Breaches" } } },
+              "targets": [ { "expr": "sum(increase(llm_rate_limit_breaches_total[5m]))" } ],
+              "gridPos": { "x":12, "y":16, "w":12, "h":8 }
+            },
+            {
+              "title": "Error Types Breakdown (Last 5m)",
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "errors",
+                  "custom": { "axisLabel": "Error Count by Type" }
+                }
+              },
+              "targets": [
+                {
+                  "expr": "sum by (error_type) (increase(llm_error_types_total[5m]))",
+                  "legendFormat": "{{`{{`}} error_type {{`}}`}}"
+                }
+              ],
+              "gridPos": { "x":0, "y":24, "w":24, "h":10 }
+            }
           ]
         }

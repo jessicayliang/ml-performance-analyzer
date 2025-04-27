@@ -8,9 +8,10 @@ data:
     llm-system-dashboard.json: |
         {
           "uid": "llm-system-dashboard",
-          "title": "LLM System Resource Metrics",
+          "title": "System Resource Metrics",
           "schemaVersion": 37,
           "version": 2,
+          "tags": ["llm-monitoring"],
           "panels": [
             { "title": "CPU Usage %", "type": "timeseries", "fieldConfig": {"defaults": {"unit": "percent", "custom": {"axisLabel": "CPU Usage %"}}}, "targets": [ { "expr": "llm_cpu_usage_percent" } ], "gridPos": {"x":0,"y":0,"w":12,"h":8} },
             { "title": "RAM Usage Bytes", "type": "timeseries", "fieldConfig": {"defaults": {"unit": "bytes", "custom": {"axisLabel": "RAM Usage (bytes)"}}}, "targets": [ { "expr": "llm_ram_usage_bytes" } ], "gridPos": {"x":12,"y":0,"w":12,"h":8} },

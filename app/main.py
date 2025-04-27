@@ -78,8 +78,13 @@ async def generate(request: PromptRequest):
 
         return {"output": response_text}
 
+    except HTTPException as http_exc:
+        ERROR_COUNT.labels(user_id=user_id).inc()
+        ERROR_TYPES.labels(error_type=f"HTTP_{http_exc.status_code}").inc()
+        raise http_exc
+
     except Exception as e:
-        ERROR_COUNT.inc()
+        ERROR_COUNT.labels(user_id=user_id).inc()
         ERROR_TYPES.labels(error_type=type(e).__name__).inc()
         raise e
 
