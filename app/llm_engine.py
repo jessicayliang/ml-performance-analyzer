@@ -17,14 +17,25 @@ def generate_text(messages: list[dict], max_tokens: int, temperature: float, top
         add_generation_prompt=True
     )
 
+    tokenized_prompt = tokenizer(
+        formatted_prompt,
+        truncation=True,
+        return_tensors="pt"
+    )
+
+    truncated_prompt = tokenizer.decode(
+        tokenized_prompt.input_ids[0],
+        skip_special_tokens=False
+    )
+
     # Prepare sampling params and call vLLM
     sampling_params = SamplingParams(
         temperature=temperature,
         top_p=top_p,
         max_tokens=max_tokens
     )
-    outputs = llm.generate([formatted_prompt], sampling_params)
+    outputs = llm.generate([truncated_prompt], sampling_params)
 
     # Decode the response
     generated_text = outputs[0].outputs[0].text
-    return generated_text, tokenizer.encode(formatted_prompt), tokenizer.encode(generated_text)
+    return generated_text, tokenizer.encode(truncated_prompt), tokenizer.encode(generated_text)
