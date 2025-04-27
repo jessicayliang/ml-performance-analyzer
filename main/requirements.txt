@@ -9,7 +9,7 @@ prometheus-fastapi-instrumentator==7.1.0
 prometheus_client==0.21.1
 tqdm==4.67.1
 psutil==5.9.8
-py3nvml==0.2.9
+py3nvml==0.2.7
 nvidia-ml-py==11.495.69
 pynvml==11.5.0
 py-spy==0.3.14
