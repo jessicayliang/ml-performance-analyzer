@@ -73,25 +73,31 @@ curl -X POST "http://localhost:8000/generate" -H "Content-Type: application/json
  -d '{"prompt": "Explain how transformers work.", "max_tokens": 100, "user_id": "user_1"}'
 ```
 
-To view metrics collected, just go to http://localhost:8000/metrics
+To view metrics collected by Prometheus, just go to http://localhost:8000/metrics
 
-6. Open Grafana Dashboard
+6. Open Grafana Dashboards
 
 ```
 // Port-forward Grafana web UI
 kubectl port-forward svc/llm-monitoring-grafana 8080:80
-
-// You can also port-forward Prometheus web UI
-kubectl port-forward svc/llm-monitoring-kube-promet-prometheus 9090:9090
 ```
 
-Now, just open http://localhost:8080/ for Grafana Web UI, or http://localhost:9090 for Prometheus Web UI. You will need to obtain a password from the secret:
+Now, just open http://localhost:8080/ for Grafana Web UI. You will need to obtain a password from the secret:
 
 ```
 kubectl get secret llm-monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 ```
 
-Use the username "admin", and the password decoded from the secret above. You can now navigate to the Dashboard menu to see the custom dashboards for our application.
+Use the username "admin", and the password decoded from the secret above. You can now navigate to the Dashboard menu to see the custom dashboards for our application (prefixed with LLM).
+
+7. (Optional) Open Prometheus Web UI
+
+```
+// Port-forward Prometheus web UI
+kubectl port-forward svc/llm-monitoring-kube-promet-prometheus 9090:9090
+```
+
+You can now open http://localhost:9090 for Prometheus Web UI.
 
 ## Metrics Collected
 
