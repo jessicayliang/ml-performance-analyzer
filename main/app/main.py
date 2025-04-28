@@ -29,7 +29,6 @@ user_message_counts = defaultdict(int)
 last_user_activity = {}
 MAX_CONTEXT_LENGTH = 4096  # Adjust based on your model's context window
 
-
 class PromptRequest(BaseModel):
     user_id: str
     prompt: str
@@ -151,4 +150,4 @@ def clean_inactive_users():
     thread.start()
 
 start_metrics_updater()
-clean_inactive_users()
+clean_inacti
