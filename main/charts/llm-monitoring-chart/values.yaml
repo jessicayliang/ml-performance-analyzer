@@ -25,11 +25,5 @@ kube-prometheus-stack:
     grafana:
         enabled: true
         defaultDashboardsEnabled: true
-        dashboards:
-            default:
-                llm-metrics:
-                    json: |
-                        # Include your dashboard JSON here
-                    datasource: Prometheus
         service:
             type: LoadBalancer
