@@ -92,6 +92,7 @@ Use the username "admin", and the password decoded from the secret above.
 
 ## Metrics Collected
 
+
 ### Garbage collection
 
 `python_gc_objects_collected_total`: The total number of objects collected during garbage collection.
@@ -117,6 +118,7 @@ Use the username "admin", and the password decoded from the secret above.
 `llm_tokens_generated_total`: Total number of tokens generated in response to requests.
 `llm_tokens_input_total`: Total number of input tokens processed.
 `llm_error_count_total`: Total number of failed requests.
+`llm_error_types`: Types of errors encountered.
 
 ### Resource Utilization
 
@@ -136,6 +138,49 @@ Use the username "admin", and the password decoded from the secret above.
 `llm_rate_limit_breaches_total`: Number of rate-limit breaches.
 `llm_throttling_incidents_total`: Number of throttling incidents.
 
-```
+### Model Parameters
 
-```
+`llm_temperature_distribution: Distribution of temperature values used`
+`llm_top_p_distribution: Distribution of top_p values used`
+`llm_prompt_response_ratio: Ratio of prompt tokens to response tokens`
+
+### Performance Breakdown
+
+`llm_tokenization_time_seconds: Time spent on tokenization`
+`llm_model_load_time_seconds: Time taken to load model into memory`
+`llm_model_init_time_seconds: Time taken to initialize model`
+`llm_prompt_processing_time_seconds: Time spent processing prompts`
+`llm_inference_computation_time_seconds: Pure inference computation time`
+`llm_tokens_per_second: Generation speed in tokens per second`
+
+### KV Cache
+
+`llm_kv_cache_size_bytes: KV cache memory usage in bytes`
+`llm_kv_cache_hit_ratio: KV cache hit ratio`
+
+### Batch Processing
+
+`llm_batch_size: Batch sizes used for inference`
+`llm_effective_batch_utilization: Percentage of batch capacity utilized`
+
+### Additional GPU Metrics
+
+`llm_gpu_utilization_percent: GPU utilization percentage`
+`llm_gpu_power_usage_watts: GPU power consumption in watts`
+`llm_gpu_temperature_celsius: GPU temperature in Celsius`
+
+### Network Metrics
+
+`llm_network_bytes_sent: Total bytes sent over network`
+`llm_network_bytes_received: Total bytes received over network`
+
+### User Metrics
+
+`llm_unique_users: Number of unique users in time window`
+`llm_user_session_length: Length of user sessions in messages`
+`llm_context_length_utilization: Percentage of max context length used`
+
+### Business Metrics
+
+`llm_estimated_cost_dollars: Estimated cost of requests in dollars`
+`llm_tokens_processed_per_dollar: Tokens processed per dollar spent`
