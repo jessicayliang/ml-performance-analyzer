@@ -39,8 +39,6 @@ MODEL_LOAD_TIME = Gauge('llm_model_load_time_seconds', 'Time taken to load model
 MODEL_INIT_TIME = Gauge('llm_model_init_time_seconds', 'Time taken to initialize model')
 
 # Breaking down the inference pipeline
-PROMPT_PROCESSING_TIME = Histogram('llm_prompt_processing_time_seconds', 'Time spent processing prompts',
-                                   buckets=[0.001, 0.01, 0.05, 0.1, 0.5])
 INFERENCE_COMPUTATION_TIME = Histogram('llm_inference_computation_time_seconds', 'Pure inference computation time',
                                        buckets=[0.05, 0.1, 0.5, 1.0, 5.0, 10.0])
 TOKENS_PER_SECOND = Histogram('llm_tokens_per_second', 'Generation speed in tokens per second',

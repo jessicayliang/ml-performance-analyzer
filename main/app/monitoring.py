@@ -48,7 +48,7 @@ def update_resource_metrics():
             # Estimate KV cache size (this is a rough estimate)
             # In practice, you would need to get this from your LLM framework
             KV_CACHE_SIZE_BYTES.set(gpu.memoryUsed * 0.7 * 1024 * 1024)  # Rough estimate
-    except Exception:
+    except Exception as e:
         print(f"Unexpected exception: {e}")
 
 def start_metrics_updater():

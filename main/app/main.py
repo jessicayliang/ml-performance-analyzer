@@ -1,4 +1,5 @@
 import time
+import threading
 from collections import defaultdict
 from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
@@ -149,5 +150,5 @@ def clean_inactive_users():
     thread = threading.Thread(target=_loop, daemon=True)
     thread.start()
 
-# Start the user cleanup task
+start_metrics_updater()
 clean_inactive_users()

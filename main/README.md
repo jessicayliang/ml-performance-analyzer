@@ -149,7 +149,6 @@ Use the username "admin", and the password decoded from the secret above.
 `llm_tokenization_time_seconds: Time spent on tokenization`
 `llm_model_load_time_seconds: Time taken to load model into memory`
 `llm_model_init_time_seconds: Time taken to initialize model`
-`llm_prompt_processing_time_seconds: Time spent processing prompts`
 `llm_inference_computation_time_seconds: Pure inference computation time`
 `llm_tokens_per_second: Generation speed in tokens per second`
 

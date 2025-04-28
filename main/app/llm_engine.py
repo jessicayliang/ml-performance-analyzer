@@ -6,7 +6,7 @@ from transformers import AutoTokenizer
 from app.metrics import (
     TOKENIZATION_TIME, MODEL_TEMPERATURE, TOP_P_DISTRIBUTION,
     PROMPT_RESPONSE_RATIO, INFERENCE_COMPUTATION_TIME, TOKENS_PER_SECOND,
-    MODEL_LOAD_TIME, MODEL_INIT_TIME
+    MODEL_LOAD_TIME, MODEL_INIT_TIME, BATCH_SIZE, EFFECTIVE_BATCH_UTILIZATION
 )
 
 MODEL_ID = "Qwen/Qwen2.5-0.5B-Instruct"
@@ -49,6 +49,10 @@ def generate_text(messages: list[dict], max_tokens: int, temperature: float, top
         top_p=top_p,
         max_tokens=max_tokens
     )
+
+    batch_size = 1  # Or dynamically determine based on your application
+    BATCH_SIZE.observe(batch_size)
+    EFFECTIVE_BATCH_UTILIZATION.set(batch_size / llm.max_model_len * 100)  # Adjust based on vLLM's API
 
     # Inference time
     inference_start = time.time()
