@@ -161,7 +161,10 @@ data:
               "fieldConfig": { "defaults": { "unit": "short" } },
               "targets": [
                 { "expr": "node_load1",      "legendFormat": "Load 1m" },
-                { "expr": "node_cpu_seconds_total{mode!=\"idle\"}", "legendFormat": "CPU Busy" }
+                {
+                  "expr": "100 * (1 - avg by (instance)(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])))",
+                  "legendFormat": "CPU Busy %"
+                }
               ]
             }
           ]
