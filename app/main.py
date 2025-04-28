@@ -20,6 +20,7 @@ chat_histories = {}
 class PromptRequest(BaseModel):
     user_id: str
     prompt: str
+    model: str = "llama"
     max_tokens: int = 256
     temperature: float = 0.7
     top_p: float = 0.95
@@ -33,9 +34,10 @@ async def generate(request: PromptRequest):
 
         user_id = request.user_id
         user_prompt = request.prompt
+        model = request.model
 
         # Check for throttling
-        if is_throttled(user_id):
+        if is_throttled(user_id, model):
             raise HTTPException(status_code=429, detail="Too many requests. Please wait before trying again.")
 
         # Initialize chat history if not present
@@ -53,7 +55,8 @@ async def generate(request: PromptRequest):
             messages=history,
             max_tokens=request.max_tokens,
             temperature=request.temperature,
-            top_p=request.top_p
+            top_p=request.top_p,
+            model=model
         )
 
         ttft_end = time.time()
@@ -68,24 +71,24 @@ async def generate(request: PromptRequest):
             history = system_prompt + trimmed_history
 
         # Log metrics
-        REQUEST_LATENCY.labels(user_id=user_id).observe(time.time() - start_time)
-        TIME_TO_FIRST_TOKEN.labels(user_id=user_id).observe(ttft_end - ttft_start)
-        REQUEST_COUNT.labels(user_id=user_id).inc()
-        TOKENS_INPUT.labels(user_id=user_id).inc(len(input_tokens))
-        TOKENS_GENERATED.labels(user_id=user_id).inc(len(output_tokens))
+        REQUEST_LATENCY.labels(user_id=user_id, model=model).observe(time.time() - start_time)
+        TIME_TO_FIRST_TOKEN.labels(user_id=user_id, model=model).observe(ttft_end - ttft_start)
+        REQUEST_COUNT.labels(user_id=user_id, model=model).inc()
+        TOKENS_INPUT.labels(user_id=user_id, model=model).inc(len(input_tokens))
+        TOKENS_GENERATED.labels(user_id=user_id, model=model).inc(len(output_tokens))
         TOKEN_LENGTH_INPUT.observe(len(input_tokens))
         TOKEN_LENGTH_OUTPUT.observe(len(output_tokens))
 
         return {"output": response_text}
 
     except HTTPException as http_exc:
-        ERROR_COUNT.labels(user_id=user_id).inc()
-        ERROR_TYPES.labels(error_type=f"HTTP_{http_exc.status_code}").inc()
+        ERROR_COUNT.labels(user_id=user_id, model=model).inc()
+        ERROR_TYPES.labels(error_type=f"HTTP_{http_exc.status_code}", model=model).inc()
         raise http_exc
 
     except Exception as e:
-        ERROR_COUNT.labels(user_id=user_id).inc()
-        ERROR_TYPES.labels(error_type=type(e).__name__).inc()
+        ERROR_COUNT.labels(user_id=user_id, model=model).inc()
+        ERROR_TYPES.labels(error_type=type(e).__name__, model=model).inc()
         raise e
 
 @app.get("/metrics")

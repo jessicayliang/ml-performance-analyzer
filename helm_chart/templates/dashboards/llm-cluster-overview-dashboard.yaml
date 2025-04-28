@@ -1,0 +1,283 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: llm-cluster-overview-dashboard
+    labels:
+        grafana_dashboard: "1"
+data:
+    llm-cluster-overview-dashboard.json: |
+        {
+          "uid": "llm-cluster-overview-dashboard",
+          "title": "LLM Cluster Overview",
+          "schemaVersion": 37,
+          "version": 3,
+          "time": { "from": "now-1h", "to": "now" },
+          "refresh": "5s",
+          "tags": ["llm-monitoring"],
+          "templating": {
+            "list": [
+              {
+                "name": "model",
+                "type": "query",
+                "label": "Model",
+                "datasource": "Prometheus",
+                "refresh": 1,
+                "query": "label_values(llm_request_latency_seconds_bucket, model)",
+                "multi": true,
+                "includeAll": true,
+                "current": { "text": "All", "value": "$__all" }
+              }
+            ]
+          },
+          "panels": [
+            {
+              "id": 1,
+              "type": "stat",
+              "title": "Queries per second (QPS)",
+              "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "ops/sec",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 50 },
+                      { "color": "red", "value": 100 }
+                    ]
+                  }
+                }
+              },
+              "targets": [
+                {
+                  "expr": "sum(rate(llm_request_count_total{model=~\"$model\"}[1m]))"
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "type": "stat",
+              "title": "Avg Request Latency",
+              "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "s",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 0.5 },
+                      { "color": "red", "value": 1 }
+                    ]
+                  }
+                }
+              },
+              "targets": [
+                {
+                  "expr":
+                    "sum(rate(llm_request_latency_seconds_sum{model=~\"$model\"}[1m])) / sum(rate(llm_request_latency_seconds_count{model=~\"$model\"}[1m]))"
+                }
+              ]
+            },
+            {
+              "id": 3,
+              "type": "stat",
+              "title": "Error Rate",
+              "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percent",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 1 },
+                      { "color": "red", "value": 5 }
+                    ]
+                  }
+                }
+              },
+              "targets": [
+                {
+                  "expr":
+                    "sum(rate(llm_error_count_total{model=~\"$model\"}[5m])) / sum(rate(llm_request_count_total{model=~\"$model\"}[5m])) * 100"
+                }
+              ]
+            },
+            {
+              "id": 4,
+              "type": "timeseries",
+              "title": "Latency P50 / P90 / P99",
+              "gridPos": { "x": 0, "y": 4, "w": 12, "h": 6 },
+              "fieldConfig": { "defaults": { "unit": "s" } },
+              "targets": [
+                {
+                  "expr":
+                    "histogram_quantile(0.5, sum by (le)(rate(llm_request_latency_seconds_bucket{model=~\"$model\"}[5m])))",
+                  "legendFormat": "p50"
+                },
+                {
+                  "expr":
+                    "histogram_quantile(0.9, sum by (le)(rate(llm_request_latency_seconds_bucket{model=~\"$model\"}[5m])))",
+                  "legendFormat": "p90"
+                },
+                {
+                  "expr":
+                    "histogram_quantile(0.99, sum by (le)(rate(llm_request_latency_seconds_bucket{model=~\"$model\"}[5m])))",
+                  "legendFormat": "p99"
+                }
+              ]
+            },
+            {
+              "id": 5,
+              "type": "timeseries",
+              "title": "Time-to-First-Token P50 / P90",
+              "gridPos": { "x": 12, "y": 4, "w": 12, "h": 6 },
+              "fieldConfig": { "defaults": { "unit": "s" } },
+              "targets": [
+                {
+                  "expr":
+                    "histogram_quantile(0.5, sum by (le)(rate(llm_time_to_first_token_seconds_bucket{model=~\"$model\"}[5m])))",
+                  "legendFormat": "p50"
+                },
+                {
+                  "expr":
+                    "histogram_quantile(0.9, sum by (le)(rate(llm_time_to_first_token_seconds_bucket{model=~\"$model\"}[5m])))",
+                  "legendFormat": "p90"
+                }
+              ]
+            },
+            {
+              "id": 6,
+              "type": "timeseries",
+              "title": "Queue Depth",
+              "gridPos": { "x": 0, "y": 10, "w": 8, "h": 6 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 5 },
+                      { "color": "red", "value": 10 }
+                    ]
+                  }
+                }
+              },
+              "targets": [
+                { "expr": "llm_queue_size" }
+              ]
+            },
+            {
+              "id": 7,
+              "type": "timeseries",
+              "title": "Queue Time P50 / P90",
+              "gridPos": { "x": 8, "y": 10, "w": 8, "h": 6 },
+              "fieldConfig": { "defaults": { "unit": "s" } },
+              "targets": [
+                {
+                  "expr":
+                    "histogram_quantile(0.5, sum by (le)(rate(llm_queue_time_seconds_bucket[5m])))",
+                  "legendFormat": "p50"
+                },
+                {
+                  "expr":
+                    "histogram_quantile(0.9, sum by (le)(rate(llm_queue_time_seconds_bucket[5m])))",
+                  "legendFormat": "p90"
+                }
+              ]
+            },
+            {
+              "id": 8,
+              "type": "timeseries",
+              "title": "GPU Memory Usage",
+              "gridPos": { "x": 16, "y": 10, "w": 8, "h": 6 },
+              "fieldConfig": { "defaults": { "unit": "bytes", "min": 0 } },
+              "targets": [
+                { "expr": "llm_gpu_memory_usage_bytes" }
+              ]
+            },
+            {
+              "id": 9,
+              "type": "timeseries",
+              "title": "CPU Usage",
+              "gridPos": { "x": 0, "y": 16, "w": 8, "h": 6 },
+              "fieldConfig": {
+                "defaults": { "unit": "percent", "min": 0, "max": 100 }
+              },
+              "targets": [
+                { "expr": "llm_cpu_usage_percent" }
+              ]
+            },
+            {
+              "id": 10,
+              "type": "timeseries",
+              "title": "RAM Usage",
+              "gridPos": { "x": 8, "y": 16, "w": 8, "h": 6 },
+              "fieldConfig": { "defaults": { "unit": "bytes", "min": 0 } },
+              "targets": [
+                { "expr": "llm_ram_usage_bytes" }
+              ]
+            },
+            {
+              "id": 11,
+              "type": "barchart",
+              "title": "Top Models by QPS",
+              "gridPos": { "x": 16, "y": 16, "w": 8, "h": 6 },
+              "fieldConfig": { "defaults": { "unit": "ops/sec" } },
+              "targets": [
+                {
+                  "expr":
+                    "topk(5, sum by(model)(rate(llm_request_count_total[5m])))"
+                }
+              ],
+              "options": { "showLegend": true }
+            },
+            {
+              "id": 12,
+              "type": "timeseries",
+              "title": "Error Trends by Model",
+              "gridPos": { "x": 0, "y": 22, "w": 12, "h": 6 },
+              "fieldConfig": { "defaults": { "unit": "errors/s" } },
+              "targets": [
+                {
+                  "expr": "sum(rate(llm_error_count_total[5m])) by (model)",
+                  "legendFormat": "{{`{{model}}`}}"
+                }
+              ]
+            },
+            {
+              "id": 13,
+              "type": "table",
+              "title": "Error Types (Last 5m)",
+              "gridPos": { "x": 12, "y": 22, "w": 12, "h": 6 },
+              "targets": [
+                {
+                  "expr":
+                    "topk(10, increase(llm_error_types_total{model=~\"$model\"}[5m]))",
+                  "legendFormat": "{{`{{error_type}}`}}"
+                }
+              ]
+            },
+            {
+              "id": 14,
+              "type": "timeseries",
+              "title": "Tokens In / Out Rate",
+              "gridPos": { "x": 0, "y": 28, "w": 24, "h": 6 },
+              "fieldConfig": { "defaults": { "unit": "tokens/s" } },
+              "targets": [
+                {
+                  "expr":
+                    "sum(rate(llm_tokens_input_total{model=~\"$model\"}[1m]))",
+                  "legendFormat": "in"
+                },
+                {
+                  "expr":
+                    "sum(rate(llm_tokens_generated_total{model=~\"$model\"}[1m]))",
+                  "legendFormat": "out"
+                }
+              ]
+            }
+          ]
+        }

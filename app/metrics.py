@@ -4,13 +4,13 @@ from prometheus_client import Counter, Histogram, Gauge
 REQUEST_LATENCY = Histogram(
     'llm_request_latency_seconds',
     'Time spent processing entire request',
-    ['user_id'],
+    ['user_id', 'model'],
     buckets=[0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 60.0]
 )
 TIME_TO_FIRST_TOKEN = Histogram(
     'llm_time_to_first_token_seconds',
     'Time to first token',
-    ['user_id'],
+    ['user_id', 'model'],
     buckets=[0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0]
 )
 
@@ -18,29 +18,29 @@ TIME_TO_FIRST_TOKEN = Histogram(
 REQUEST_COUNT = Counter(
     'llm_request_count',
     'Total number of requests',
-    ['user_id']
+    ['user_id', 'model']
 )
 TOKENS_GENERATED = Counter(
     'llm_tokens_generated_total',
     'Total number of tokens generated',
-    ['user_id']
+    ['user_id', 'model']
 )
 TOKENS_INPUT = Counter(
     'llm_tokens_input_total',
     'Total number of input tokens processed',
-    ['user_id']
+    ['user_id', 'model']
 )
 ERROR_COUNT = Counter(
     'llm_error_count',
     'Total number of failed requests',
-    ['user_id']
+    ['user_id', 'model']
 )
 
 # Counter for error types
 ERROR_TYPES = Counter(
     'llm_error_types',
     'Types of errors',
-    ['error_type']
+    ['error_type', 'model']
 )
 
 # Histograms for token length
@@ -86,7 +86,7 @@ QUEUE_SIZE = Gauge(
 RATE_LIMIT_BREACHES = Counter(
     'llm_rate_limit_breaches',
     'Rate limit breaches',
-    ['user_id']
+    ['user_id', 'model']
 )
 THROTTLING_INCIDENTS = Counter(
     'llm_throttling_incidents',

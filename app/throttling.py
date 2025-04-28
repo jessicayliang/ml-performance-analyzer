@@ -3,15 +3,15 @@ from app.metrics import RATE_LIMIT_BREACHES
 
 # In-memory store: user_id → last_request_timestamp
 last_request_time = {}
-THROTTLE_COOLDOWN = 1
+THROTTLE_COOLDOWN = 5
 
 # This says: you cannot have more than 1 request per THROTTLE_COOLDOWN
-def is_throttled(user_id: str) -> bool:
+def is_throttled(user_id: str, model: str) -> bool:
     now = time.time()
     last_time = last_request_time.get(user_id)
 
     if last_time and (now - last_time) < THROTTLE_COOLDOWN:
-        RATE_LIMIT_BREACHES.labels(user_id=user_id).inc()
+        RATE_LIMIT_BREACHES.labels(user_id=user_id, model=model).inc()
         return True
 
     # Update last request time

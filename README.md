@@ -70,7 +70,7 @@ kubectl port-forward svc/llm-monitoring 8000:8000
 
 // Run inference on external IP address
 curl -X POST "http://localhost:8000/generate" -H "Content-Type: application/json" \
- -d '{"prompt": "Explain how transformers work.", "max_tokens": 100, "user_id": "user_1"}'
+ -d '{"prompt": "Explain how transformers work.", "max_tokens": 100, "user_id": "user_1", "model": "qwen"}'
 ```
 
 To view metrics collected by Prometheus, just go to http://localhost:8000/metrics
