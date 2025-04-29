@@ -49,8 +49,6 @@ async def generate(request: PromptRequest):
         active_users.add(user_id)
         user_message_counts[user_id] += 1
         last_user_activity[user_id] = time.time()
-        UNIQUE_USERS.set(len(active_users))
-        USER_SESSION_LENGTH.observe(user_message_counts[user_id])
 
         # Check for throttling
         if is_throttled(user_id):
@@ -82,15 +80,6 @@ async def generate(request: PromptRequest):
         context_utilization = total_context_length / MAX_CONTEXT_LENGTH
         CONTEXT_LENGTH_UTILIZATION.observe(context_utilization)
 
-        # Calculate cost
-        input_cost = len(input_tokens) * INPUT_TOKEN_COST
-        output_cost = len(output_tokens) * OUTPUT_TOKEN_COST
-        total_cost = input_cost + output_cost
-
-        # Record cost metrics
-        ESTIMATED_COST.labels(model_id=MODEL_ID, operation_type="generate").inc(total_cost)
-        tokens_per_dollar = (len(input_tokens) + len(output_tokens)) / total_cost if total_cost > 0 else 0
-        TOKENS_PROCESSED_PER_DOLLAR.set(tokens_per_dollar)
 
         # Append model's response to the history
         history.append({"role": "assistant", "content": response_text})
@@ -150,4 +139,4 @@ def clean_inactive_users():
     thread.start()
 
 start_metrics_updater()
-clean_inacti
+clean_inactive_users()

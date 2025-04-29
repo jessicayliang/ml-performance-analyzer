@@ -5,8 +5,8 @@ from vllm import LLM, SamplingParams
 from transformers import AutoTokenizer
 from app.metrics import (
     TOKENIZATION_TIME, MODEL_TEMPERATURE, TOP_P_DISTRIBUTION,
-    PROMPT_RESPONSE_RATIO, INFERENCE_COMPUTATION_TIME, TOKENS_PER_SECOND,
-    MODEL_LOAD_TIME, MODEL_INIT_TIME, BATCH_SIZE, EFFECTIVE_BATCH_UTILIZATION
+    INFERENCE_COMPUTATION_TIME, TOKENS_PER_SECOND,
+    MODEL_INIT_TIME
 )
 
 MODEL_ID = "Qwen/Qwen2.5-0.5B-Instruct"
@@ -20,7 +20,6 @@ llm = LLM(model=MODEL_ID, dtype=torch.float16)
 model_init_end = time.time()
 
 # Record metrics
-MODEL_LOAD_TIME.set(model_init_start - model_load_start)
 MODEL_INIT_TIME.set(model_init_end - model_init_start)
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, token=HF_TOKEN)
@@ -50,10 +49,6 @@ def generate_text(messages: list[dict], max_tokens: int, temperature: float, top
         max_tokens=max_tokens
     )
 
-    batch_size = 1  # Or dynamically determine based on your application
-    BATCH_SIZE.observe(batch_size)
-    EFFECTIVE_BATCH_UTILIZATION.set(batch_size / llm.max_model_len * 100)  # Adjust based on vLLM's API
-
     # Inference time
     inference_start = time.time()
     outputs = llm.generate([formatted_prompt], sampling_params)
@@ -68,11 +63,9 @@ def generate_text(messages: list[dict], max_tokens: int, temperature: float, top
     inference_time = inference_end - inference_start
     tokens_count = len(output_tokens)
     tokens_per_second = tokens_count / inference_time if inference_time > 0 else 0
-    prompt_response_ratio = len(input_tokens) / len(output_tokens) if len(output_tokens) > 0 else 0
 
     # Record metrics
     INFERENCE_COMPUTATION_TIME.observe(inference_time)
     TOKENS_PER_SECOND.observe(tokens_per_second)
-    PROMPT_RESPONSE_RATIO.observe(prompt_response_ratio)
 
     return generated_text, input_tokens, output_tokens

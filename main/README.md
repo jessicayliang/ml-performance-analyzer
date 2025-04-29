@@ -136,4 +136,24 @@ Use the username "admin", and the password decoded from the secret above.
 `llm_queue_time_seconds`: Time spent in the queue before processing.
 `llm_queue_size`: Current size of the request queue.
 `llm_rate_limit_breaches_total`: Number of rate-limit breaches.
-`llm_throttling_incidents_t
+`llm_throttling_incidents_total`: Number of throttling incidents.
+
+### Model Parameters
+
+`llm_temperature_distribution: Distribution of temperature values used` IP
+`llm_top_p_distribution: Distribution of top_p values used` IP
+
+### Performance Breakdown
+
+`llm_tokenization_time_seconds: Time spent on tokenization`
+`llm_model_init_time_seconds: Time taken to initialize model`
+`llm_inference_computation_time_seconds: Pure inference computation time` IP
+`llm_tokens_per_second: Generation speed in tokens per second`
+
+### Additional GPU Metrics 
+
+`llm_gpu_utilization_percent: GPU utilization percentage` IP
+
+### User Metrics
+
+`llm_context_length_utilization: Percentage of max context length used` IP
