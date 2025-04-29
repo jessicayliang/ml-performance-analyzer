@@ -77,9 +77,9 @@ async def generate(request: PromptRequest):
         # After generating the response:
         # Calculate context length utilization
         total_context_length = len(input_tokens) + len(output_tokens)
-        context_utilization = total_context_length / MAX_CONTEXT_LENGTH
-        CONTEXT_LENGTH_UTILIZATION.observe(context_utilization)
-
+        if MAX_CONTEXT_LENGTH and MAX_CONTEXT_LENGTH > 0:
+            context_utilization = total_context_length / MAX_CONTEXT_LENGTH
+            CONTEXT_LENGTH_UTILIZATION.observe(context_utilization)
 
         # Append model's response to the history
         history.append({"role": "assistant", "content": response_text})

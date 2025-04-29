@@ -155,5 +155,4 @@ Use the username "admin", and the password decoded from the secret above.
 `llm_gpu_utilization_percent: GPU utilization percentage` IP
 
 ### User Metrics
-
 `llm_context_length_utilization: Percentage of max context length used` IP
