@@ -27,11 +27,8 @@ llm = LLM(model=MODEL_ID, dtype=torch.float16)
 
 def generate_text(messages: list[dict], max_tokens: int, temperature: float, top_p: float):
     # Record temperature and top_p settings
-    if temperature is not None:
-        MODEL_TEMPERATURE.observe(temperature)
-
-    if top_p is not None:
-        TOP_P_DISTRIBUTION.observe(top_p)
+    MODEL_TEMPERATURE.observe(temperature if temperature is not None else 0.7)
+    TOP_P_DISTRIBUTION.observe(top_p if top_p is not None else 0.95)
 
     # Tokenization time
     tokenize_start = time.time()

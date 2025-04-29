@@ -79,7 +79,10 @@ async def generate(request: PromptRequest):
         total_context_length = len(input_tokens) + len(output_tokens)
         if MAX_CONTEXT_LENGTH and MAX_CONTEXT_LENGTH > 0:
             context_utilization = total_context_length / MAX_CONTEXT_LENGTH
-            CONTEXT_LENGTH_UTILIZATION.observe(context_utilization)
+        else:
+            # Default to a reasonable value if MAX_CONTEXT_LENGTH is not defined
+            context_utilization = total_context_length / 4096  # Using 4096 as fallback value
+        CONTEXT_LENGTH_UTILIZATION.observe(context_utilization)
 
         # Append model's response to the history
         history.append({"role": "assistant", "content": response_text})
@@ -138,5 +141,11 @@ def clean_inactive_users():
     thread = threading.Thread(target=_loop, daemon=True)
     thread.start()
 
+# Initialize metrics with default values on startup
+def initialize_context_metric():
+    # Add initial observation for context length utilization
+    CONTEXT_LENGTH_UTILIZATION.observe(0.0)
+
 start_metrics_updater()
+initialize_context_metric()
 clean_inactive_users()
