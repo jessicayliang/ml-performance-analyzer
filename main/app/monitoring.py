@@ -2,7 +2,6 @@ import psutil
 import GPUtil
 import time
 import threading
-import pynvml
 import os
 import subprocess
 from app.metrics import (
