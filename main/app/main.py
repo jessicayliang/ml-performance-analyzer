@@ -19,10 +19,6 @@ app.middleware("http")(queue_simulation_middleware)
 # In-memory session store: user_id -> list of messages
 chat_histories = {}
 
-# Cost constants (example values)
-INPUT_TOKEN_COST = 0.0000015  # $0.0000015 per token
-OUTPUT_TOKEN_COST = 0.000002  # $0.000002 per token
-
 # Track active users and their session lengths
 active_users = set()
 user_message_counts = defaultdict(int)

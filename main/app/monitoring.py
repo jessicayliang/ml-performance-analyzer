@@ -26,25 +26,27 @@ def initialize_metrics_with_defaults():
 
 def update_resource_metrics():
 
-    while True:
-        # CPU and RAM
-        CPU_USAGE_PERCENT.set(psutil.cpu_percent())
-        RAM_USAGE_BYTES.set(psutil.virtual_memory().used)
+    # CPU and RAM
+    CPU_USAGE_PERCENT.set(psutil.cpu_percent())
+    RAM_USAGE_BYTES.set(psutil.virtual_memory().used)
 
-        # GPU memory and utilization
-        try:
-            gpus = GPUtil.getGPUs()
-            if gpus:
-                gpu = gpus[0] # assume first GPU
-                GPU_MEMORY_USAGE.set(gpus[0].memoryUsed * 1024 * 1024)
-                GPU_UTILIZATION_PERCENT.set(gpu.load * 100)  # Convert to percentage
+    # GPU memory and utilization
+    try:
+        gpus = GPUtil.getGPUs()
+        if gpus:
+            gpu = gpus[0] # assume first GPU
+            GPU_MEMORY_USAGE.set(gpus[0].memoryUsed * 1024 * 1024)
+            GPU_UTILIZATION_PERCENT.set(gpu.load * 100)  # Convert to percentage
 
-        except Exception as e:
-            print(f"Failed to collect GPU metrics: {e}")
+    except Exception as e:
+        print(f"Failed to collect GPU metrics: {e}")
 
-        time.sleep(5)
 
 def start_metrics_updater():
     initialize_metrics_with_defaults()
-    thread = threading.Thread(target=update_resource_metrics, daemon=True)
+    def _loop():
+        while True:
+            update_resource_metrics()
+            time.sleep(5)
+    thread = threading.Thread(target=_loop, daemon=True)
     thread.start()
