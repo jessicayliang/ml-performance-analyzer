@@ -2,6 +2,7 @@ import psutil
 import GPUtil
 import time
 import threading
+import pynvml
 import os
 import subprocess
 from app.metrics import (
@@ -25,13 +26,6 @@ def initialize_metrics_with_defaults():
     print("Metrics initialized with default values")
 
 def update_resource_metrics():
-    # Initialize NVML
-    try:
-        pynvml.nvmlInit()
-        handle = pynvml.nvmlDeviceGetHandleByIndex(0)  # Assuming single GPU
-    except Exception as e:
-        print(f"Failed to initialize NVML: {e}")
-        return
 
     while True:
         # CPU and RAM
@@ -40,11 +34,11 @@ def update_resource_metrics():
 
         # GPU memory and utilization
         try:
-            mem_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
-            util_info = pynvml.nvmlDeviceGetUtilizationRates(handle)
-
-            GPU_MEMORY_USAGE.set(mem_info.used)
-            GPU_UTILIZATION_PERCENT.set(util_info.gpu)  # Already in percent (0–100)
+            gpus = GPUtil.getGPUs()
+            if gpus:
+                gpu = gpus[0] # assume first GPU
+                GPU_MEMORY_USAGE.set(gpus[0].memoryUsed * 1024 * 1024)
+                GPU_UTILIZATION_PERCENT.set(gpu.load * 100)  # Convert to percentage
 
         except Exception as e:
             print(f"Failed to collect GPU metrics: {e}")
