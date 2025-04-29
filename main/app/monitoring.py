@@ -7,7 +7,7 @@ import subprocess
 from app.metrics import (
     GPU_MEMORY_USAGE, CPU_USAGE_PERCENT, RAM_USAGE_BYTES,
     GPU_UTILIZATION_PERCENT, MODEL_TEMPERATURE, TOP_P_DISTRIBUTION,
-    INFERENCE_COMPUTATION_TIME, CONTEXT_LENGTH_UTILIZATION
+    INFERENCE_COMPUTATION_TIME, CONTEXT_LENGTH_UTILIZATION, TOKENS_PER_SECOND
 )
 
 def initialize_metrics_with_defaults():
@@ -21,6 +21,7 @@ def initialize_metrics_with_defaults():
     # Initialize GPU metrics even if no GPU is available
     GPU_UTILIZATION_PERCENT.set(0.0)
     GPU_MEMORY_USAGE.set(0.0)
+    TOKENS_PER_SECOND.observe(0.0)
 
     print("Metrics initialized with default values")
 

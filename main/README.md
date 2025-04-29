@@ -145,10 +145,10 @@ Use the username "admin", and the password decoded from the secret above.
 
 ### Performance Breakdown
 
-`llm_tokenization_time_seconds: Time spent on tokenization`
-`llm_model_init_time_seconds: Time taken to initialize model`
+`llm_tokenization_time_seconds: Time spent on tokenization` IP
+`llm_model_init_time_seconds: Time taken to initialize model` IP
 `llm_inference_computation_time_seconds: Pure inference computation time` IP
-`llm_tokens_per_second: Generation speed in tokens per second`
+`llm_tokens_per_second: Generation speed in tokens per second` IP
 
 ### Additional GPU Metrics 
 
