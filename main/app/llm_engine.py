@@ -15,15 +15,12 @@ HF_TOKEN = os.getenv("HF_TOKEN", None)  # only some gated models need HF_TOKEN
 # Measure model load time
 model_load_start = time.time()
 tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, token=HF_TOKEN)
-model_init_start = time.time()
 llm = LLM(model=MODEL_ID, dtype=torch.float16)
 model_init_end = time.time()
 
 # Record metrics
-MODEL_INIT_TIME.set(model_init_end - model_init_start)
+MODEL_INIT_TIME.set(model_init_end - model_load_start)
 
-tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, token=HF_TOKEN)
-llm = LLM(model=MODEL_ID, dtype=torch.float16)
 
 def generate_text(messages: list[dict], max_tokens: int, temperature: float, top_p: float):
     # Record temperature and top_p settings
