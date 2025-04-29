@@ -23,10 +23,6 @@ MODEL_INIT_TIME.set(model_init_end - model_load_start)
 
 
 def generate_text(messages: list[dict], max_tokens: int, temperature: float, top_p: float):
-    # Record temperature and top_p settings
-    MODEL_TEMPERATURE.observe(temperature if temperature is not None else 0.7)
-    TOP_P_DISTRIBUTION.observe(top_p if top_p is not None else 0.95)
-
     # Tokenization time
     tokenize_start = time.time()
 

@@ -34,6 +34,10 @@ class PromptRequest(BaseModel):
 
 @app.post("/generate")
 async def generate(request: PromptRequest):
+    # Record temperature and top_p settings
+    MODEL_TEMPERATURE.observe(temperature if temperature is not None else 0.7)
+    TOP_P_DISTRIBUTION.observe(top_p if top_p is not None else 0.95)
+
     start_time = time.time()
 
     try:
