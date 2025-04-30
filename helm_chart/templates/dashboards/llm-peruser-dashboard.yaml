@@ -150,7 +150,8 @@ data:
               "fieldConfig": { "defaults": { "unit": "req" } },
               "targets": [
                 {
-                  "expr": "increase(llm_request_count_total{user_id=~\"$user_id\",model=~\"$model\"}[5m])"
+                  "expr": "increase(llm_request_count_total{user_id=~\"$user_id\",model=~\"$model\"}[5m])",
+                  "legendFormat": "{{`{{user_id}}`}}"
                 }
               ]
             },
@@ -224,7 +225,8 @@ data:
               "fieldConfig": { "defaults": { "unit": "errs" } },
               "targets": [
                 {
-                  "expr": "increase(llm_error_count_total{user_id=~\"$user_id\",model=~\"$model\"}[5m])"
+                  "expr": "increase(llm_error_count_total{user_id=~\"$user_id\",model=~\"$model\"}[5m])",
+                  "legendFormat": "{{`{{user_id}}`}}"
                 }
               ]
             },
