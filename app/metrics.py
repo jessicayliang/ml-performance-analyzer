@@ -92,3 +92,8 @@ THROTTLING_INCIDENTS = Counter(
     'llm_throttling_incidents',
     'Throttling incidents'
 )
+
+TST_TOGGLE = Gauge(
+    'llm_index_toggle',
+    'Toggles between 0 and 1 every time index page is accessed'
+)

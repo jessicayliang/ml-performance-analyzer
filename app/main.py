@@ -10,6 +10,7 @@ from app.middleware import queue_simulation_middleware
 from app.throttling import is_throttled
 
 MAX_HISTORY_MESSAGES = 7
+toggle_state = 0
 
 app = FastAPI()
 app.middleware("http")(queue_simulation_middleware)
@@ -96,6 +97,9 @@ def metrics():
 
 @app.get("/")
 def health():
+    global toggle_state
+    toggle_state = 1 - toggle_state 
+    TST_TOGGLE.set(toggle_state)
     return {"status": "Model is ready"}
 
 start_metrics_updater()
