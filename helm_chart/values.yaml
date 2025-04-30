@@ -4,7 +4,7 @@ replicaCount: 1
 image:
     repository: ""
     tag: ""
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
 
 service:
     type: LoadBalancer
@@ -21,13 +21,19 @@ nodeSelector: {}
 tolerations: []
 affinity: []
 
+alertmanager:
+    enabled: true
+    alertmanagerSpec:
+        configSecret: alertmanager-llm-monitoring
+        externalUrl: "http://localhost:9093"
+
 kube-prometheus-stack:
     prometheus:
         prometheusSpec:
             scrapeInterval: 15s
             serviceMonitorSelector: {}
             serviceMonitorNamespaceSelector: {}
-
+            externalUrl: "http://localhost:9090"
     grafana:
         enabled: true
         defaultDashboardsEnabled: true
