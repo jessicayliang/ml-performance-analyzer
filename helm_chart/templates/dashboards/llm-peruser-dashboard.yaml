@@ -1,0 +1,261 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: llm-peruser-dashboard
+    labels:
+        grafana_dashboard: "1"
+    annotations:
+        grafana_folder: "Custom Dashboards"
+data:
+    llm-peruser-dashboard.json: |-
+        {
+          "uid": "llm-peruser-dashboard",
+          "title": "LLM Metrics Per User",
+          "schemaVersion": 37,
+          "version": 3,
+          "time": { "from": "now-1h", "to": "now"},
+          "refresh": "5s",
+          "tags": ["user"],
+          "templating": {
+            "list": [
+              {
+                "name": "user_id",
+                "type": "query",
+                "label": "User",
+                "datasource": "Prometheus",
+                "refresh": 1,
+                "query": "label_values(llm_request_count_total, user_id)",
+                "multi": true,
+                "includeAll": true,
+                "current": { "text":"All","value":"$__all" }
+              },
+              {
+                "name": "model",
+                "type": "query",
+                "label": "Model",
+                "datasource": "Prometheus",
+                "refresh": 1,
+                "query": "label_values(llm_request_latency_seconds_bucket, model)",
+                "multi": true,
+                "includeAll": true,
+                "current": { "text":"All","value":"$__all" }
+              }
+            ]
+          },
+          "panels": [
+            {
+              "id": 1,
+              "type": "stat",
+              "title": "Queries per second (QPS)",
+              "gridPos": { "x":0, "y":0, "w":6, "h":4 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "ops/sec",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color":"green","value":0 },
+                      { "color":"yellow","value":5 },
+                      { "color":"red","value":10 }
+                    ]
+                  }
+                }
+              },
+              "targets": [
+                {
+                  "expr": "sum(rate(llm_request_count_total{user_id=~\"$user_id\",model=~\"$model\"}[1m]))"
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "type": "stat",
+              "title": "Avg Request Latency",
+              "gridPos": { "x":6, "y":0, "w":6, "h":4 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "s",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color":"green","value":0 },
+                      { "color":"yellow","value":0.5 },
+                      { "color":"red","value":1 }
+                    ]
+                  }
+                }
+              },
+              "targets": [
+                {
+                  "expr":
+                    "sum(rate(llm_request_latency_seconds_sum{user_id=~\"$user_id\",model=~\"$model\"}[5m])) / sum(rate(llm_request_latency_seconds_count{user_id=~\"$user_id\",model=~\"$model\"}[5m]))"
+                }
+              ]
+            },
+            {
+              "id": 3,
+              "type": "stat",
+              "title": "Error Rate",
+              "gridPos": { "x":12, "y":0, "w":6, "h":4 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percent",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color":"green","value":0 },
+                      { "color":"yellow","value":1 },
+                      { "color":"red","value":5 }
+                    ]
+                  }
+                }
+              },
+              "targets": [
+                {
+                  "expr":
+                    "sum(rate(llm_error_count_total{user_id=~\"$user_id\",model=~\"$model\"}[5m])) / sum(rate(llm_request_count_total{user_id=~\"$user_id\",model=~\"$model\"}[5m])) * 100"
+                }
+              ]
+            },
+            {
+              "id": 4,
+              "type": "stat",
+              "title": "Avg Time to First Token",
+              "gridPos": { "x":18, "y":0, "w":6, "h":4 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "s",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color":"green","value":0 },
+                      { "color":"yellow","value":0.1 },
+                      { "color":"red","value":0.5 }
+                    ]
+                  }
+                }
+              },
+              "targets": [
+                {
+                  "expr":
+                    "sum(rate(llm_time_to_first_token_seconds_sum{user_id=~\"$user_id\",model=~\"$model\"}[5m])) / sum(rate(llm_time_to_first_token_seconds_count{user_id=~\"$user_id\",model=~\"$model\"}[5m]))"
+                }
+              ]
+            },
+            {
+              "id": 5,
+              "type": "timeseries",
+              "title": "Request Count (5 m)",
+              "gridPos": { "x":0, "y":4, "w":12, "h":6 },
+              "fieldConfig": { "defaults": { "unit": "req" } },
+              "targets": [
+                {
+                  "expr": "increase(llm_request_count_total{user_id=~\"$user_id\",model=~\"$model\"}[5m])",
+                  "legendFormat": "{{`{{user_id}}`}}"
+                }
+              ]
+            },
+            {
+              "id": 6,
+              "type": "timeseries",
+              "title": "Latency P50 / P90 / P99",
+              "gridPos": { "x":12, "y":4, "w":12, "h":6 },
+              "fieldConfig": { "defaults": { "unit": "s" } },
+              "targets": [
+                {
+                  "expr":
+                    "histogram_quantile(0.5, sum by (le)(rate(llm_request_latency_seconds_bucket{user_id=~\"$user_id\",model=~\"$model\"}[5m])))",
+                  "legendFormat": "p50"
+                },
+                {
+                  "expr":
+                    "histogram_quantile(0.9, sum by (le)(rate(llm_request_latency_seconds_bucket{user_id=~\"$user_id\",model=~\"$model\"}[5m])))",
+                  "legendFormat": "p90"
+                },
+                {
+                  "expr":
+                    "histogram_quantile(0.99, sum by (le)(rate(llm_request_latency_seconds_bucket{user_id=~\"$user_id\",model=~\"$model\"}[5m])))",
+                  "legendFormat": "p99"
+                }
+              ]
+            },
+            {
+              "id": 7,
+              "type": "timeseries",
+              "title": "Time-to-First-Token P50 / P90",
+              "gridPos": { "x":0, "y":10, "w":12, "h":6 },
+              "fieldConfig": { "defaults": { "unit": "s" } },
+              "targets": [
+                {
+                  "expr":
+                    "histogram_quantile(0.5, sum by (le)(rate(llm_time_to_first_token_seconds_bucket{user_id=~\"$user_id\",model=~\"$model\"}[5m])))",
+                  "legendFormat": "p50"
+                },
+                {
+                  "expr":
+                    "histogram_quantile(0.9, sum by (le)(rate(llm_time_to_first_token_seconds_bucket{user_id=~\"$user_id\",model=~\"$model\"}[5m])))",
+                  "legendFormat": "p90"
+                }
+              ]
+            },
+            {
+              "id": 8,
+              "type": "timeseries",
+              "title": "Tokens In / Out Rate",
+              "gridPos": { "x":12, "y":10, "w":12, "h":6 },
+              "fieldConfig": { "defaults": { "unit": "tokens/s" } },
+              "targets": [
+                {
+                  "expr":
+                    "rate(llm_tokens_input_total{user_id=~\"$user_id\",model=~\"$model\"}[1m])",
+                  "legendFormat": "in"
+                },
+                {
+                  "expr":
+                    "rate(llm_tokens_generated_total{user_id=~\"$user_id\",model=~\"$model\"}[1m])",
+                  "legendFormat": "out"
+                }
+              ]
+            },
+            {
+              "id": 9,
+              "type": "timeseries",
+              "title": "Errors (5 m)",
+              "gridPos": { "x":0, "y":16, "w":12, "h":6 },
+              "fieldConfig": { "defaults": { "unit": "errs" } },
+              "targets": [
+                {
+                  "expr": "increase(llm_error_count_total{user_id=~\"$user_id\",model=~\"$model\"}[5m])",
+                  "legendFormat": "{{`{{user_id}}`}}"
+                }
+              ]
+            },
+            {
+              "id": 10,
+              "type": "table",
+              "title": "Top Error Types (5 m)",
+              "gridPos": { "x":12, "y":16, "w":12, "h":6 },
+              "fieldConfig": { "defaults": { } },
+              "targets": [
+                {
+                  "expr":
+                    "topk(10, increase(llm_error_types_total{model=~\"$model\"}[5m]))",
+                  "legendFormat": "{{`{{error_type}}`}}"
+                }
+              ]
+            },
+            {
+              "id": 11,
+              "type": "stat",
+              "title": "Rate Limit Breaches (5 m)",
+              "gridPos": { "x":18, "y":22, "w":6, "h":4 },
+              "fieldConfig": { "defaults": { "unit": "breaches" } },
+              "targets": [
+                {
+                  "expr":
+                    "increase(llm_rate_limit_breaches_total{user_id=~\"$user_id\",model=~\"$model\"}[5m])"
+                }
+              ]
+            }
+          ]
+        }
