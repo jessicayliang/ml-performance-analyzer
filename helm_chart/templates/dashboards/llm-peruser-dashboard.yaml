@@ -4,6 +4,8 @@ metadata:
     name: llm-peruser-dashboard
     labels:
         grafana_dashboard: "1"
+    annotations:
+        grafana_folder: "Custom Dashboards"
 data:
     llm-peruser-dashboard.json: |-
         {
@@ -13,7 +15,7 @@ data:
           "version": 3,
           "time": { "from": "now-1h", "to": "now"},
           "refresh": "5s",
-          "tags": ["llm-monitoring"],
+          "tags": ["user"],
           "templating": {
             "list": [
               {

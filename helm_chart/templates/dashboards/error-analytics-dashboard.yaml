@@ -4,16 +4,18 @@ metadata:
     name: llm-error-analytics-dashboard
     labels:
         grafana_dashboard: "1"
+    annotations:
+        grafana_folder: "Custom Dashboards"
 data:
-    llm-error-analytics-dashboard.json: |-
+    llm-error-analytics-dashboard.json: |
         {
-          "uid": "llm-error-analytics-dashboard",
-          "title": "LLM Error Analytics",
+          "uid": "error-analytics-dashboard",
+          "title": "Error Analytics",
           "schemaVersion": 37,
           "version": 3,
           "time": { "from": "now-1h", "to": "now" },
           "refresh": "5s",
-          "tags": ["llm-monitoring"],
+          "tags": ["error"],
           "templating": {
             "list": [
               {
@@ -111,7 +113,7 @@ data:
                   "expr": "sum(rate(llm_error_count_total{model=~\"$model\"}[1m])) / sum(rate(llm_request_count_total{model=~\"$model\"}[1m])) * 100",
                   "legendFormat": "{{`{{model}}`}}"
                 }
-              ],
+              ]
             },
             {
               "id": 5,

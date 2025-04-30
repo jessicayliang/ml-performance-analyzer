@@ -7,7 +7,7 @@ MAX_MODEL_LEN = 2048
 
 MODELS = {
     "qwen": "Qwen/Qwen2.5-0.5B-Instruct",
-    "llama": "unsloth/Llama-3.2-1B-Instruct"
+    "llama": "suayptalha/FastLlama-3.2-1B-Instruct"
 }
 
 HF_TOKEN = os.getenv("HF_TOKEN", None)

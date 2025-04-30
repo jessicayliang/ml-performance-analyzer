@@ -5,7 +5,7 @@ from starlette.responses import Response
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from app.llm_engine import generate_text
 from app.metrics import *
-from app.monitoring import start_metrics_updater, update_resource_metrics
+from app.monitoring import start_metrics_updater
 from app.middleware import queue_simulation_middleware
 from app.throttling import is_throttled
 
@@ -27,10 +27,8 @@ class PromptRequest(BaseModel):
 
 @app.post("/generate")
 async def generate(request: PromptRequest):
-    start_time = time.time()
-
     try:
-        ttft_start = time.time()
+        start_time = time.time()
 
         user_id = request.user_id
         user_prompt = request.prompt
@@ -59,7 +57,7 @@ async def generate(request: PromptRequest):
             model=model
         )
 
-        ttft_end = time.time()
+        end_time = time.time()
 
         # Append model's response to the history
         history.append({"role": "assistant", "content": response_text})
@@ -71,13 +69,14 @@ async def generate(request: PromptRequest):
             history = system_prompt + trimmed_history
 
         # Log metrics
-        REQUEST_LATENCY.labels(user_id=user_id, model=model).observe(time.time() - start_time)
-        TIME_TO_FIRST_TOKEN.labels(user_id=user_id, model=model).observe(ttft_end - ttft_start)
+        REQUEST_LATENCY.labels(user_id=user_id, model=model).observe(end_time - start_time)
         REQUEST_COUNT.labels(user_id=user_id, model=model).inc()
         TOKENS_INPUT.labels(user_id=user_id, model=model).inc(len(input_tokens))
         TOKENS_GENERATED.labels(user_id=user_id, model=model).inc(len(output_tokens))
         TOKEN_LENGTH_INPUT.observe(len(input_tokens))
         TOKEN_LENGTH_OUTPUT.observe(len(output_tokens))
+        if len(output_tokens) != 0:
+            TIME_TO_FIRST_TOKEN.labels(user_id=user_id, model=model).observe((end_time - start_time) / len(output_tokens))  # estimate
 
         return {"output": response_text}
 

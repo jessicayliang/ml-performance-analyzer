@@ -4,16 +4,18 @@ metadata:
     name: llm-cluster-overview-dashboard
     labels:
         grafana_dashboard: "1"
+    annotations:
+        grafana_folder: "Custom Dashboards"
 data:
     llm-cluster-overview-dashboard.json: |
         {
-          "uid": "llm-cluster-overview-dashboard",
-          "title": "LLM Cluster Overview",
+          "uid": "cluster-overview-dashboard",
+          "title": "Cluster Overview",
           "schemaVersion": 37,
           "version": 3,
           "time": { "from": "now-1h", "to": "now" },
           "refresh": "5s",
-          "tags": ["llm-monitoring"],
+          "tags": ["cluster-overview"],
           "templating": {
             "list": [
               {

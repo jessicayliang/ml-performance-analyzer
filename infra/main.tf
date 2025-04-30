@@ -3,6 +3,10 @@ provider "google" {
   region  = var.region
 }
 
+provider "kubernetes" {
+  config_path = "~/.kube/config"
+}
+
 provider "helm" {
   kubernetes {
     config_path = "~/.kube/config"
@@ -50,6 +54,15 @@ resource "google_container_node_pool" "gpu_nodes" {
   }
 }
 
+resource "kubernetes_priority_class" "dcgm_exporter_priority" {
+  metadata {
+    name = "dcgm-exporter"
+  }
+  value         = 10000000
+  global_default = false
+  description   = "Custom priority class for dcgm-exporter pods to avoid system-critical quota issues."
+}
+
 resource "helm_release" "llm_monitoring" {
   name       = "llm-monitoring"
   chart      = "../helm_chart"
@@ -71,4 +84,9 @@ resource "helm_release" "llm_monitoring" {
 	name  = "forceRedeploy"  # this is used to redeploy HELM each time "terraform apply" is called
 	value = timestamp()
   }
+
+  depends_on = [
+	google_container_node_pool.gpu_nodes,
+	kubernetes_priority_class.dcgm_exporter_priority
+  ]
 }

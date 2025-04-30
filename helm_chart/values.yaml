@@ -13,6 +13,10 @@ service:
 resources:
     limits:
         nvidia.com/gpu: 1
+
+    requests:
+        nvidia.com/gpu: 1
+
 nodeSelector: {}
 tolerations: []
 affinity: []
@@ -22,6 +26,8 @@ kube-prometheus-stack:
         prometheusSpec:
             scrapeInterval: 15s
             serviceMonitorSelector: {}
+            serviceMonitorNamespaceSelector: {}
+
     grafana:
         enabled: true
         defaultDashboardsEnabled: true
@@ -32,3 +38,61 @@ kube-prometheus-stack:
                 enabled: true
                 searchNamespace: default
                 waitForGrafana: true
+                folderAnnotation: grafana_folder
+                provider:
+                    foldersFromFilesStructure: true
+
+dcgm-exporter:
+    image:
+        repository: nvcr.io/nvidia/k8s/dcgm-exporter
+        tag: "4.2.0-4.1.0-ubuntu22.04"
+
+    securityContext:
+        privileged: true
+
+    tolerations:
+        - operator: Exists
+
+    nodeSelector:
+        cloud.google.com/gke-accelerator: nvidia-l4
+
+    service:
+        enabled: true
+        type: ClusterIP
+        port: 9400
+        name: metrics
+
+    serviceMonitor:
+        enabled: true
+
+        additionalLabels:
+            release: llm-monitoring
+
+        namespaceSelector:
+            matchNames:
+                - default
+
+        selector:
+            matchLabels:
+                app.kubernetes.io/name: dcgm-exporter
+                app.kubernetes.io/instance: llm-monitoring
+
+        endpoints:
+            - port: metrics
+              path: /metrics
+              interval: 15s
+
+    extraHostVolumes:
+        - name: nvidia-libs
+          hostPath: /home/kubernetes/bin/nvidia/lib64
+
+    extraVolumeMounts:
+        - name: nvidia-libs
+          mountPath: /usr/local/nvidia/lib64
+          readOnly: true
+
+    extraEnv:
+        - name: LD_LIBRARY_PATH
+          value: /usr/local/nvidia/lib64:$LD_LIBRARY_PATH
+
+    priorityClassName: dcgm-exporter

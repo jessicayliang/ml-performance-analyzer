@@ -1,0 +1,231 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: gpu-performance-overview-dashboard
+    labels:
+        grafana_dashboard: "1"
+    annotations:
+        grafana_folder: "Custom Dashboards"
+data:
+    gpu-performance-overview-dashboard.json: |
+        {
+          "uid": "gpu-performance-overview-dashboard",
+          "title": "GPU Performance Overview",
+          "schemaVersion": 37,
+          "version": 3,
+          "time": { "from": "now-1h", "to": "now" },
+          "refresh": "5s",
+          "tags": ["gpu"],
+          "templating": {
+            "list": [
+              {
+                "name": "gpu",
+                "type": "query",
+                "label": "GPU ID",
+                "datasource": "Prometheus",
+                "refresh": 1,
+                "query": "label_values(DCGM_FI_DEV_GPU_UTIL, gpu)",
+                "multi": true,
+                "includeAll": true,
+                "current": { "text": "All", "value": "$__all" }
+              },
+              {
+                "name": "hostname",
+                "type": "query",
+                "label": "Hostname",
+                "datasource": "Prometheus",
+                "refresh": 1,
+                "query": "label_values(DCGM_FI_DEV_GPU_UTIL, Hostname)",
+                "multi": true,
+                "includeAll": true,
+                "current": { "text": "All", "value": "$__all" }
+              }
+            ]
+          },
+          "panels": [
+            {
+              "id": 1,
+              "type": "stat",
+              "title": "GPU Utilization",
+              "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percent",
+                  "min": 0,
+                  "max": 100,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 50 },
+                      { "color": "red", "value": 80 }
+                    ]
+                  }
+                }
+              },
+              "targets": [
+                {
+                  "expr": "avg(avg_over_time(DCGM_FI_DEV_GPU_UTIL{gpu=~\"$gpu\",Hostname=~\"$hostname\"}[1m]))"
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "type": "stat",
+              "title": "Memory Copy Utilization",
+              "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percent",
+                  "min": 0,
+                  "max": 100
+                }
+              },
+              "targets": [
+                {
+                  "expr": "avg(avg_over_time(DCGM_FI_DEV_MEM_COPY_UTIL{gpu=~\"$gpu\",Hostname=~\"$hostname\"}[1m]))"
+                }
+              ]
+            },
+            {
+              "id": 3,
+              "type": "stat",
+              "title": "SM Clock Frequency",
+              "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "MHz",
+                  "min": 0
+                }
+              },
+              "targets": [
+                {
+                  "expr": "avg(avg_over_time(DCGM_FI_DEV_SM_CLOCK{gpu=~\"$gpu\",Hostname=~\"$hostname\"}[1m]))"
+                }
+              ]
+            },
+            {
+              "id": 4,
+              "type": "stat",
+              "title": "Memory Clock Frequency",
+              "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "MHz",
+                  "min": 0
+                }
+              },
+              "targets": [
+                {
+                  "expr": "avg(avg_over_time(DCGM_FI_DEV_MEM_CLOCK{gpu=~\"$gpu\",Hostname=~\"$hostname\"}[1m]))"
+                }
+              ]
+            },
+            {
+              "id": 5,
+              "type": "stat",
+              "title": "GPU Temperature",
+              "gridPos": { "x": 0, "y": 4, "w": 6, "h": 4 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "celsius",
+                  "min": 0
+                }
+              },
+              "targets": [
+                {
+                  "expr": "avg(avg_over_time(DCGM_FI_DEV_GPU_TEMP{gpu=~\"$gpu\",Hostname=~\"$hostname\"}[1m]))"
+                }
+              ]
+            },
+            {
+              "id": 6,
+              "type": "stat",
+              "title": "Memory Temperature",
+              "gridPos": { "x": 6, "y": 4, "w": 6, "h": 4 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "celsius",
+                  "min": 0
+                }
+              },
+              "targets": [
+                {
+                  "expr": "avg(avg_over_time(DCGM_FI_DEV_MEMORY_TEMP{gpu=~\"$gpu\",Hostname=~\"$hostname\"}[1m]))"
+                }
+              ]
+            },
+            {
+              "id": 7,
+              "type": "stat",
+              "title": "Power Usage",
+              "gridPos": { "x": 12, "y": 4, "w": 6, "h": 4 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "watt",
+                  "min": 0
+                }
+              },
+              "targets": [
+                {
+                  "expr": "avg(avg_over_time(DCGM_FI_DEV_POWER_USAGE{gpu=~\"$gpu\",Hostname=~\"$hostname\"}[1m]))"
+                }
+              ]
+            },
+            {
+              "id": 8,
+              "type": "stat",
+              "title": "PCIe Replay Rate",
+              "gridPos": { "x": 18, "y": 4, "w": 6, "h": 4 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "ops/sec",
+                  "min": 0
+                }
+              },
+              "targets": [
+                {
+                  "expr": "avg(increase(DCGM_FI_DEV_PCIE_REPLAY_COUNTER{gpu=~\"$gpu\",Hostname=~\"$hostname\"}[5m]))"
+                }
+              ]
+            },
+            {
+              "id": 9,
+              "type": "timeseries",
+              "title": "Energy Consumption (mJ)",
+              "gridPos": { "x": 0, "y": 8, "w": 12, "h": 6 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "none"
+                }
+              },
+              "targets": [
+                {
+                  "expr": "increase(DCGM_FI_DEV_TOTAL_ENERGY_CONSUMPTION{gpu=~\"$gpu\",Hostname=~\"$hostname\"}[5m])"
+                }
+              ]
+            },
+            {
+              "id": 10,
+              "type": "timeseries",
+              "title": "Framebuffer Memory Usage",
+              "gridPos": { "x": 12, "y": 8, "w": 12, "h": 6 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "MiB",
+                  "min": 0
+                }
+              },
+              "targets": [
+                {
+                  "expr": "DCGM_FI_DEV_FB_USED{gpu=~\"$gpu\",Hostname=~\"$hostname\"}",
+                  "legendFormat": "used"
+                },
+                {
+                  "expr": "DCGM_FI_DEV_FB_FREE{gpu=~\"$gpu\",Hostname=~\"$hostname\"}",
+                  "legendFormat": "free"
+                }
+              ]
+            }
+          ]
+        }
