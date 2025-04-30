@@ -90,14 +90,17 @@ kubectl get secret llm-monitoring-grafana -o jsonpath="{.data.admin-password}" |
 
 Use the username "admin", and the password decoded from the secret above. You can now navigate to the Dashboard menu to see the custom dashboards for our application (prefixed with LLM).
 
-7. (Optional) Open Prometheus Web UI
+7. (Optional) Open Prometheus and Alert Manager Web UI
 
 ```
 // Port-forward Prometheus web UI
 kubectl port-forward svc/llm-monitoring-kube-promet-prometheus 9090:9090
+
+// Port-forward Alert Manager web UI
+kubectl port-forward svc/llm-monitoring-kube-promet-alertmanager 9093:9093
 ```
 
-You can now open http://localhost:9090 for Prometheus Web UI.
+You can now access the Prometheus Web UI at http://localhost:9090 and the Alertmanager UI at http://localhost:9093.
 
 ## Metrics Collected
 
