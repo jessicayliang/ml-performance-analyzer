@@ -4,8 +4,6 @@ metadata:
     name: general-performance-dashboard
     labels:
         grafana_dashboard: "1"
-    annotations:
-        grafana_folder: "Custom Dashboards"
 data:
     general-performance-dashboard.json: |-
         {
@@ -24,7 +22,7 @@ data:
                 "target": {
                   "limit": 100,
                   "matchAny": false,
-                  "tags": ["general-performance"],
+                  "tags": [],
                   "type": "dashboard"
                 },
                 "type": "dashboard"
@@ -34,7 +32,6 @@ data:
           "editable": true,
           "fiscalYearStartMonth": 0,
           "graphTooltip": 0,
-          "id": 27,
           "links": [],
           "liveNow": false,
           "panels": [
@@ -67,8 +64,7 @@ data:
                         "value": null
                       },
                       {
-                        "color": "red",
-                        "value": 80
+                        "color": "red"
                       }
                     ]
                   },
@@ -84,7 +80,7 @@ data:
               },
               "id": 2,
               "options": {
-                "colorMode": "background",
+                "colorMode": "none",
                 "graphMode": "none",
                 "justifyMode": "auto",
                 "orientation": "auto",
@@ -105,7 +101,7 @@ data:
                     "uid": "prometheus"
                   },
                   "editorMode": "builder",
-                  "expr": "llm_request_count_total",
+                  "expr": "sum(llm_request_count_total)",
                   "legendFormat": "__auto",
                   "range": true,
                   "refId": "A"
@@ -122,11 +118,13 @@ data:
               "fieldConfig": {
                 "defaults": {
                   "mappings": [],
+                  "max": 104,
+                  "min": 0,
                   "thresholds": {
                     "mode": "percentage",
                     "steps": [
                       {
-                        "color": "green",
+                        "color": "red",
                         "value": null
                       },
                       {
@@ -134,11 +132,12 @@ data:
                         "value": 70
                       },
                       {
-                        "color": "red",
-                        "value": 85
+                        "color": "green",
+                        "value": 90
                       }
                     ]
-                  }
+                  },
+                  "unit": "percent"
                 },
                 "overrides": []
               },
@@ -169,7 +168,8 @@ data:
                     "uid": "prometheus"
                   },
                   "editorMode": "builder",
-                  "expr": "1 - (rate(llm_error_count_total[5m]) / rate(llm_request_count_total[5m]))",
+                  "expr": "(1 - (sum(llm_error_count_total) / sum(llm_request_count_total))) * 100",
+                  "hide": false,
                   "legendFormat": "__auto",
                   "range": true,
                   "refId": "A"
@@ -232,7 +232,7 @@ data:
                     "uid": "prometheus"
                   },
                   "editorMode": "builder",
-                  "expr": "llm_error_count_total",
+                  "expr": "sum(llm_error_count_total)",
                   "legendFormat": "__auto",
                   "range": true,
                   "refId": "A"
@@ -249,7 +249,37 @@ data:
               "fieldConfig": {
                 "defaults": {
                   "color": {
-                    "mode": "continuous-GrYlRd"
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "drawStyle": "line",
+                    "fillOpacity": 0,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
                   },
                   "mappings": [],
                   "thresholds": {
@@ -266,154 +296,134 @@ data:
                     ]
                   }
                 },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_request_latency_seconds_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"+Inf\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Total number of requests observed"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_request_latency_seconds_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"0.1\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Request that took 0.1 second or less"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_request_latency_seconds_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"0.5\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Request that took 0.5 second or less"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_request_latency_seconds_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"1.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Request that took 1 second or less"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_request_latency_seconds_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"2.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Request that took 2 seconds or less"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_request_latency_seconds_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"10.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Request that took 10 seconds or less"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_request_latency_seconds_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"30.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Request that took 30 seconds or less"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_request_latency_seconds_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"5.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Request that took 5 seconds or less"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_request_latency_seconds_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"60.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Request that took 60 seconds or less"
-                      }
-                    ]
-                  }
-                ]
+                "overrides": []
               },
               "gridPos": {
                 "h": 7,
-                "w": 13,
+                "w": 5,
                 "x": 11,
                 "y": 1
               },
-              "id": 8,
+              "id": 30,
               "options": {
-                "displayMode": "lcd",
-                "minVizHeight": 10,
-                "minVizWidth": 0,
-                "orientation": "horizontal",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": false
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
                 },
-                "showUnfilled": true
+                "tooltip": {
+                  "mode": "single",
+                  "sort": "none"
+                }
               },
-              "pluginVersion": "9.3.8",
               "targets": [
                 {
                   "datasource": {
                     "type": "prometheus",
                     "uid": "prometheus"
                   },
-                  "editorMode": "builder",
-                  "expr": "llm_request_latency_seconds_bucket",
-                  "legendFormat": "__auto",
+                  "editorMode": "code",
+                  "expr": "sum(increase(llm_tokens_generated_total[1m]))",
+                  "legendFormat": "{{`{{user_id}}`}}",
                   "range": true,
                   "refId": "A"
                 }
               ],
-              "title": "Request Latency Distribution",
-              "type": "bargauge"
+              "title": "Output Tokens Generated",
+              "type": "timeseries"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "drawStyle": "line",
+                    "fillOpacity": 0,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 7,
+                "w": 5,
+                "x": 16,
+                "y": 1
+              },
+              "id": 32,
+              "options": {
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "editorMode": "code",
+                  "expr": " sum(increase(llm_tokens_input_total[1m]))",
+                  "legendFormat": "{{`{{user_id}}`}}",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "title": "Input Tokens",
+              "type": "timeseries"
             },
             {
               "collapsed": false,
@@ -449,92 +459,7 @@ data:
                   "mappings": [],
                   "unit": "percent"
                 },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{container=\"alertmanager\", endpoint=\"http-web\", instance=\"10.108.0.20:9093\", job=\"llm-monitoring-kube-promet-alertmanager\", namespace=\"default\", pod=\"alertmanager-llm-monitoring-kube-promet-alertmanager-0\", service=\"llm-monitoring-kube-promet-alertmanager\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "alertmanager"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{container=\"kube-prometheus-stack\", endpoint=\"https\", instance=\"10.108.0.16:10250\", job=\"llm-monitoring-kube-promet-operator\", namespace=\"default\", pod=\"llm-monitoring-kube-promet-operator-576dfffc94-vcx4m\", service=\"llm-monitoring-kube-promet-operator\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "kube prometheus stack"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "LLM inference"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{container=\"node-exporter\", endpoint=\"http-metrics\", instance=\"10.142.0.46:9100\", job=\"node-exporter\", namespace=\"default\", pod=\"llm-monitoring-prometheus-node-exporter-6bblw\", service=\"llm-monitoring-prometheus-node-exporter\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "node exporter"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{container=\"prometheus\", endpoint=\"http-web\", instance=\"10.108.0.21:9090\", job=\"llm-monitoring-kube-promet-prometheus\", namespace=\"default\", pod=\"prometheus-llm-monitoring-kube-promet-prometheus-0\", service=\"llm-monitoring-kube-promet-prometheus\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "prometheus"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{endpoint=\"https\", instance=\"10.142.0.44:443\", job=\"apiserver\", namespace=\"default\", service=\"kubernetes\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "API server"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{endpoint=\"https-metrics\", instance=\"10.142.0.46:10250\", job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"kube-system\", node=\"gke-llm-gke-cluster-gpu-pool-ca8870d5-l7h3\", service=\"llm-monitoring-kube-promet-kubelet\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Kubelet"
-                      }
-                    ]
-                  }
-                ]
+                "overrides": []
               },
               "gridPos": {
                 "h": 8,
@@ -574,7 +499,7 @@ data:
                   },
                   "editorMode": "builder",
                   "expr": "process_open_fds / process_max_fds",
-                  "legendFormat": "__auto",
+                  "legendFormat": "{{`{{job}}`}}",
                   "range": true,
                   "refId": "A"
                 }
@@ -602,176 +527,7 @@ data:
                   "mappings": [],
                   "unit": "bytes"
                 },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"process_resident_memory_bytes\", container=\"alertmanager\", endpoint=\"http-web\", instance=\"10.108.0.20:9093\", job=\"llm-monitoring-kube-promet-alertmanager\", namespace=\"default\", pod=\"alertmanager-llm-monitoring-kube-promet-alertmanager-0\", service=\"llm-monitoring-kube-promet-alertmanager\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "alertmanager (resident)"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"process_resident_memory_bytes\", container=\"kube-prometheus-stack\", endpoint=\"https\", instance=\"10.108.0.16:10250\", job=\"llm-monitoring-kube-promet-operator\", namespace=\"default\", pod=\"llm-monitoring-kube-promet-operator-576dfffc94-vcx4m\", service=\"llm-monitoring-kube-promet-operator\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "kube prometheus stack (resident)"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"process_resident_memory_bytes\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "LLM inference (resident)"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"process_resident_memory_bytes\", container=\"node-exporter\", endpoint=\"http-metrics\", instance=\"10.142.0.46:9100\", job=\"node-exporter\", namespace=\"default\", pod=\"llm-monitoring-prometheus-node-exporter-6bblw\", service=\"llm-monitoring-prometheus-node-exporter\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "node exporter (resident)"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"process_resident_memory_bytes\", container=\"prometheus\", endpoint=\"http-web\", instance=\"10.108.0.21:9090\", job=\"llm-monitoring-kube-promet-prometheus\", namespace=\"default\", pod=\"prometheus-llm-monitoring-kube-promet-prometheus-0\", service=\"llm-monitoring-kube-promet-prometheus\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "prometheus (resident)"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"process_resident_memory_bytes\", endpoint=\"https\", instance=\"10.142.0.44:443\", job=\"apiserver\", namespace=\"default\", service=\"kubernetes\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "API server (resident)"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"process_resident_memory_bytes\", endpoint=\"https-metrics\", instance=\"10.142.0.46:10250\", job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"kube-system\", node=\"gke-llm-gke-cluster-gpu-pool-ca8870d5-l7h3\", service=\"llm-monitoring-kube-promet-kubelet\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Kubelet (resident)"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"process_virtual_memory_bytes\", container=\"alertmanager\", endpoint=\"http-web\", instance=\"10.108.0.20:9093\", job=\"llm-monitoring-kube-promet-alertmanager\", namespace=\"default\", pod=\"alertmanager-llm-monitoring-kube-promet-alertmanager-0\", service=\"llm-monitoring-kube-promet-alertmanager\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "alertmanager (virtual)"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"process_virtual_memory_bytes\", container=\"kube-prometheus-stack\", endpoint=\"https\", instance=\"10.108.0.16:10250\", job=\"llm-monitoring-kube-promet-operator\", namespace=\"default\", pod=\"llm-monitoring-kube-promet-operator-576dfffc94-vcx4m\", service=\"llm-monitoring-kube-promet-operator\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "kube prometheus stack (virtual)"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"process_virtual_memory_bytes\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "LLM inference (virtual)"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"process_virtual_memory_bytes\", container=\"node-exporter\", endpoint=\"http-metrics\", instance=\"10.142.0.46:9100\", job=\"node-exporter\", namespace=\"default\", pod=\"llm-monitoring-prometheus-node-exporter-6bblw\", service=\"llm-monitoring-prometheus-node-exporter\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "node exporter (virtual)"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"process_virtual_memory_bytes\", container=\"prometheus\", endpoint=\"http-web\", instance=\"10.108.0.21:9090\", job=\"llm-monitoring-kube-promet-prometheus\", namespace=\"default\", pod=\"prometheus-llm-monitoring-kube-promet-prometheus-0\", service=\"llm-monitoring-kube-promet-prometheus\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "prometheus (virtual)"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"process_virtual_memory_bytes\", endpoint=\"https\", instance=\"10.142.0.44:443\", job=\"apiserver\", namespace=\"default\", service=\"kubernetes\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "API server (virtual)"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"process_virtual_memory_bytes\", endpoint=\"https-metrics\", instance=\"10.142.0.46:10250\", job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"kube-system\", node=\"gke-llm-gke-cluster-gpu-pool-ca8870d5-l7h3\", service=\"llm-monitoring-kube-promet-kubelet\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Kubelet (virtual)"
-                      }
-                    ]
-                  }
-                ]
+                "overrides": []
               },
               "gridPos": {
                 "h": 8,
@@ -811,7 +567,7 @@ data:
                   },
                   "editorMode": "builder",
                   "expr": "process_resident_memory_bytes",
-                  "legendFormat": "__auto",
+                  "legendFormat": "{{`{{job}}`}}-resident",
                   "range": true,
                   "refId": "A"
                 },
@@ -823,7 +579,7 @@ data:
                   "editorMode": "builder",
                   "expr": "process_virtual_memory_bytes",
                   "hide": false,
-                  "legendFormat": "__auto",
+                  "legendFormat": "{{`{{job}}`}}-virtual",
                   "range": true,
                   "refId": "B"
                 }
@@ -852,92 +608,7 @@ data:
                   "mappings": [],
                   "unit": "percent"
                 },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{container=\"alertmanager\", endpoint=\"http-web\", instance=\"10.108.0.20:9093\", job=\"llm-monitoring-kube-promet-alertmanager\", namespace=\"default\", pod=\"alertmanager-llm-monitoring-kube-promet-alertmanager-0\", service=\"llm-monitoring-kube-promet-alertmanager\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "alertmanager"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{container=\"kube-prometheus-stack\", endpoint=\"https\", instance=\"10.108.0.16:10250\", job=\"llm-monitoring-kube-promet-operator\", namespace=\"default\", pod=\"llm-monitoring-kube-promet-operator-576dfffc94-vcx4m\", service=\"llm-monitoring-kube-promet-operator\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "kube prometheus stack"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "LLM inference"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{container=\"node-exporter\", endpoint=\"http-metrics\", instance=\"10.142.0.46:9100\", job=\"node-exporter\", namespace=\"default\", pod=\"llm-monitoring-prometheus-node-exporter-6bblw\", service=\"llm-monitoring-prometheus-node-exporter\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "node exporter"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{container=\"prometheus\", endpoint=\"http-web\", instance=\"10.108.0.21:9090\", job=\"llm-monitoring-kube-promet-prometheus\", namespace=\"default\", pod=\"prometheus-llm-monitoring-kube-promet-prometheus-0\", service=\"llm-monitoring-kube-promet-prometheus\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "prometheus"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{endpoint=\"https\", instance=\"10.142.0.44:443\", job=\"apiserver\", namespace=\"default\", service=\"kubernetes\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "API server"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{endpoint=\"https-metrics\", instance=\"10.142.0.46:10250\", job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"kube-system\", node=\"gke-llm-gke-cluster-gpu-pool-ca8870d5-l7h3\", service=\"llm-monitoring-kube-promet-kubelet\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Kubelet"
-                      }
-                    ]
-                  }
-                ]
+                "overrides": []
               },
               "gridPos": {
                 "h": 8,
@@ -977,7 +648,7 @@ data:
                   },
                   "editorMode": "builder",
                   "expr": "rate(process_cpu_seconds_total[1m]) * 100",
-                  "legendFormat": "__auto",
+                  "legendFormat": "{{`{{job}}`}}",
                   "range": true,
                   "refId": "A"
                 }
@@ -992,593 +663,6 @@ data:
                 "w": 24,
                 "x": 0,
                 "y": 17
-              },
-              "id": 34,
-              "panels": [],
-              "title": "Token Information",
-              "type": "row"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "color": {
-                    "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisCenteredZero": false,
-                    "axisColorMode": "text",
-                    "axisLabel": "",
-                    "axisPlacement": "auto",
-                    "barAlignment": 0,
-                    "drawStyle": "line",
-                    "fillOpacity": 0,
-                    "gradientMode": "none",
-                    "hideFrom": {
-                      "legend": false,
-                      "tooltip": false,
-                      "viz": false
-                    },
-                    "lineInterpolation": "linear",
-                    "lineWidth": 1,
-                    "pointSize": 5,
-                    "scaleDistribution": {
-                      "type": "linear"
-                    },
-                    "showPoints": "auto",
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "thresholdsStyle": {
-                      "mode": "off"
-                    }
-                  },
-                  "mappings": [],
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "color": "green",
-                        "value": null
-                      },
-                      {
-                        "color": "red",
-                        "value": 80
-                      }
-                    ]
-                  }
-                },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Tokens generated"
-                      }
-                    ]
-                  }
-                ]
-              },
-              "gridPos": {
-                "h": 9,
-                "w": 5,
-                "x": 0,
-                "y": 18
-              },
-              "id": 30,
-              "options": {
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
-              "targets": [
-                {
-                  "datasource": {
-                    "type": "prometheus",
-                    "uid": "prometheus"
-                  },
-                  "editorMode": "builder",
-                  "expr": "rate(llm_tokens_generated_total[1m])",
-                  "legendFormat": "__auto",
-                  "range": true,
-                  "refId": "A"
-                }
-              ],
-              "title": "Tokens Generated ",
-              "type": "timeseries"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "custom": {
-                    "fillOpacity": 80,
-                    "gradientMode": "none",
-                    "hideFrom": {
-                      "legend": false,
-                      "tooltip": false,
-                      "viz": false
-                    },
-                    "lineWidth": 1
-                  },
-                  "mappings": [],
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "color": "green",
-                        "value": null
-                      },
-                      {
-                        "color": "red",
-                        "value": 80
-                      }
-                    ]
-                  }
-                },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_token_length_input_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"+Inf\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Total number of input tokens"
-                      },
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "palette-classic"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_token_length_input_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"10.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Number of tokens less than or equal to length 10 (input)"
-                      },
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "palette-classic"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_token_length_input_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"1000.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Number of tokens less than or equal to length 1000 (input)"
-                      },
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "palette-classic"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_token_length_input_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"100.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Number of tokens less than or equal to length 100 (input)"
-                      },
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "palette-classic"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_token_length_input_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"2000.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Number of tokens less than or equal to lenght 2000 (input)"
-                      },
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "palette-classic"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_token_length_input_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"250.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Number of tokens less than or equal to length 250 (input)"
-                      },
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "palette-classic"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_token_length_input_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"50.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Number of tokens less than or equal to length 250 (input)"
-                      },
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "palette-classic"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_token_length_input_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"500.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Number of tokens less than or equal to length 50 (input)"
-                      },
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "palette-classic"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_token_length_output_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"+Inf\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Total number of output tokens"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_token_length_output_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"500.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Number of tokens less than or equal to length 500 (output)"
-                      },
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "palette-classic"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_token_length_output_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"50.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Number of tokens less than or equal to length 500 (output)"
-                      },
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "palette-classic"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_token_length_output_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"250.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Number of tokens less than or equal to length 250 (output)"
-                      },
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "palette-classic"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_token_length_output_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"2000.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Number of tokens less than or equal to length 2000 (output)"
-                      },
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "palette-classic"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_token_length_output_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"1000.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Number of tokens less than or equal to length 1000 (output)"
-                      },
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "palette-classic"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_token_length_output_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"100.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Number of tokens less than or equal to length 100 (output)"
-                      },
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "palette-classic"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{__name__=\"llm_token_length_output_bucket\", container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", le=\"10.0\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Number of tokens less than or equal to length 10 (output)"
-                      },
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "palette-classic"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              "gridPos": {
-                "h": 9,
-                "w": 14,
-                "x": 5,
-                "y": 18
-              },
-              "id": 28,
-              "options": {
-                "bucketOffset": 0,
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                }
-              },
-              "targets": [
-                {
-                  "datasource": {
-                    "type": "prometheus",
-                    "uid": "prometheus"
-                  },
-                  "editorMode": "builder",
-                  "expr": "llm_token_length_input_bucket",
-                  "legendFormat": "__auto",
-                  "range": true,
-                  "refId": "A"
-                },
-                {
-                  "datasource": {
-                    "type": "prometheus",
-                    "uid": "prometheus"
-                  },
-                  "editorMode": "builder",
-                  "expr": "llm_token_length_output_bucket",
-                  "hide": false,
-                  "legendFormat": "__auto",
-                  "range": true,
-                  "refId": "B"
-                }
-              ],
-              "title": "Token Length Distribution",
-              "type": "histogram"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "color": {
-                    "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisCenteredZero": false,
-                    "axisColorMode": "text",
-                    "axisLabel": "",
-                    "axisPlacement": "auto",
-                    "barAlignment": 0,
-                    "drawStyle": "line",
-                    "fillOpacity": 0,
-                    "gradientMode": "none",
-                    "hideFrom": {
-                      "legend": false,
-                      "tooltip": false,
-                      "viz": false
-                    },
-                    "lineInterpolation": "linear",
-                    "lineWidth": 1,
-                    "pointSize": 5,
-                    "scaleDistribution": {
-                      "type": "linear"
-                    },
-                    "showPoints": "auto",
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "thresholdsStyle": {
-                      "mode": "off"
-                    }
-                  },
-                  "mappings": [],
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "color": "green",
-                        "value": null
-                      },
-                      {
-                        "color": "red",
-                        "value": 80
-                      }
-                    ]
-                  }
-                },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "{container=\"llm-inference\", endpoint=\"http\", instance=\"10.108.0.18:8000\", job=\"llm-monitoring\", namespace=\"default\", pod=\"llm-monitoring-5658f95f45-z9n8g\", service=\"llm-monitoring\"}"
-                    },
-                    "properties": [
-                      {
-                        "id": "displayName",
-                        "value": "Input token rate"
-                      }
-                    ]
-                  }
-                ]
-              },
-              "gridPos": {
-                "h": 9,
-                "w": 5,
-                "x": 19,
-                "y": 18
-              },
-              "id": 32,
-              "options": {
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
-              "targets": [
-                {
-                  "datasource": {
-                    "type": "prometheus",
-                    "uid": "prometheus"
-                  },
-                  "editorMode": "builder",
-                  "expr": " rate(llm_tokens_input_total[1m])",
-                  "legendFormat": "__auto",
-                  "range": true,
-                  "refId": "A"
-                }
-              ],
-              "title": "Input Token Rate",
-              "type": "timeseries"
-            },
-            {
-              "collapsed": false,
-              "gridPos": {
-                "h": 1,
-                "w": 24,
-                "x": 0,
-                "y": 27
               },
               "id": 26,
               "panels": [],
@@ -1683,7 +767,7 @@ data:
                 "h": 10,
                 "w": 8,
                 "x": 0,
-                "y": 28
+                "y": 18
               },
               "id": 20,
               "options": {
@@ -1706,7 +790,7 @@ data:
                   },
                   "editorMode": "builder",
                   "expr": "rate(python_gc_objects_collected_total[5m])",
-                  "legendFormat": "__auto",
+                  "legendFormat": "{{`{{generation}}`}}",
                   "range": true,
                   "refId": "A"
                 }
@@ -1789,7 +873,7 @@ data:
                 "h": 10,
                 "w": 8,
                 "x": 8,
-                "y": 28
+                "y": 18
               },
               "id": 22,
               "options": {
@@ -1812,7 +896,7 @@ data:
                   },
                   "editorMode": "builder",
                   "expr": "llm_ram_usage_bytes",
-                  "legendFormat": "__auto",
+                  "legendFormat": "{{`{{__name__}}`}}",
                   "range": true,
                   "refId": "A"
                 }
@@ -1895,7 +979,7 @@ data:
                 "h": 10,
                 "w": 8,
                 "x": 16,
-                "y": 28
+                "y": 18
               },
               "id": 24,
               "options": {
@@ -1918,7 +1002,7 @@ data:
                   },
                   "editorMode": "builder",
                   "expr": "llm_cpu_usage_percent",
-                  "legendFormat": "__auto",
+                  "legendFormat": "{{`{{__name__}}`}}",
                   "range": true,
                   "refId": "A"
                 }
@@ -1927,6 +1011,7 @@ data:
               "type": "timeseries"
             }
           ],
+          "refresh": "5s",
           "schemaVersion": 37,
           "style": "dark",
           "tags": [],
@@ -1934,13 +1019,13 @@ data:
             "list": []
           },
           "time": {
-            "from": "now-6h",
+            "from": "now-1h",
             "to": "now"
           },
           "timepicker": {},
           "timezone": "",
-          "title": "General Performance Analysis",
+          "title": "4. General Performance Analysis",
           "uid": "general-performance-analysis-dashboard",
-          "version": 2,
+          "version": 3,
           "weekStart": ""
         }

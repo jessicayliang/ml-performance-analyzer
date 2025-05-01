@@ -4,13 +4,11 @@ metadata:
     name: llm-global-dashboard
     labels:
         grafana_dashboard: "1"
-    annotations:
-        grafana_folder: "Custom Dashboards"
 data:
     llm-global-dashboard.json: |
         {
           "uid":"llm-global-dashboard",
-          "title":"LLM Global Metrics",
+          "title":"1. LLM Global Metrics",
           "schemaVersion":37,
           "version":3,
           "time":{"from":"now-1h","to":"now"},
@@ -123,7 +121,7 @@ data:
                   ]
                 }
               }},
-              "targets":[{"expr":"llm_queue_size"}]
+              "targets":[{"expr":"llm_queue_size","legendFormat":"{{`{{service}}`}}"}]
             },
             {
               "id":10,"type":"timeseries","title":"Queue Time P50/P90","gridPos":{"x":6,"y":16,"w":6,"h":4},
@@ -146,22 +144,22 @@ data:
             {
               "id":13,"type":"timeseries","title":"GPU Memory Usage","gridPos":{"x":0,"y":20,"w":6,"h":4},
               "fieldConfig":{"defaults":{"unit":"bytes","min":0}},
-              "targets":[{"expr":"llm_gpu_memory_usage_bytes"}]
+              "targets":[{"expr":"llm_gpu_memory_usage_bytes","legendFormat":"{{`{{service}}`}}"}]
             },
             {
               "id":14,"type":"timeseries","title":"CPU Usage","gridPos":{"x":6,"y":20,"w":6,"h":4},
               "fieldConfig":{"defaults":{"unit":"percent","min":0,"max":100}},
-              "targets":[{"expr":"llm_cpu_usage_percent"}]
+              "targets":[{"expr":"llm_cpu_usage_percent","legendFormat":"{{`{{service}}`}}"}]
             },
             {
               "id":15,"type":"timeseries","title":"RAM Usage","gridPos":{"x":12,"y":20,"w":6,"h":4},
               "fieldConfig":{"defaults":{"unit":"bytes","min":0}},
-              "targets":[{"expr":"llm_ram_usage_bytes"}]
+              "targets":[{"expr":"llm_ram_usage_bytes","legendFormat":"{{`{{service}}`}}"}]
             },
             {
               "id":16,"type":"barchart","title":"Top Models by QPS","gridPos":{"x":18,"y":20,"w":6,"h":4},
               "fieldConfig":{"defaults":{"unit":"ops/sec"}},
-              "targets":[{"expr":"topk(5,sum by(model)(rate(llm_request_count_total[5m])))"}]
+              "targets":[{"expr":"topk(5,sum by(model)(rate(llm_request_count_total[5m])))","legendFormat":"{{`{{model}}`}}"}]
             },
             {
               "id":17,"type":"table","title":"Error Types (5m)","gridPos":{"x":0,"y":24,"w":24,"h":6},

@@ -33,7 +33,7 @@ prometheus:
         serviceMonitorSelector: {}
         serviceMonitorNamespaceSelector: {}
         externalUrl: "http://localhost:9090"
-        
+
 grafana:
     enabled: true
     defaultDashboardsEnabled: true
@@ -44,9 +44,6 @@ grafana:
             enabled: true
             searchNamespace: default
             waitForGrafana: true
-            folderAnnotation: grafana_folder
-            provider:
-                foldersFromFilesStructure: true
 
 dcgm-exporter:
     image:

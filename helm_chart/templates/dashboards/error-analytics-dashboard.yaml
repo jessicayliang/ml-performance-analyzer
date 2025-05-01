@@ -4,13 +4,11 @@ metadata:
     name: llm-error-analytics-dashboard
     labels:
         grafana_dashboard: "1"
-    annotations:
-        grafana_folder: "Custom Dashboards"
 data:
     llm-error-analytics-dashboard.json: |
         {
           "uid": "error-analytics-dashboard",
-          "title": "Error Analytics",
+          "title": "3. Error Analytics",
           "schemaVersion": 37,
           "version": 3,
           "time": { "from": "now-1h", "to": "now" },
