@@ -27,26 +27,26 @@ alertmanager:
         configSecret: alertmanager-llm-monitoring
         externalUrl: "http://localhost:9093"
 
-kube-prometheus-stack:
-    prometheus:
-        prometheusSpec:
-            scrapeInterval: 15s
-            serviceMonitorSelector: {}
-            serviceMonitorNamespaceSelector: {}
-            externalUrl: "http://localhost:9090"
-    grafana:
-        enabled: true
-        defaultDashboardsEnabled: true
-        service:
-            type: LoadBalancer
-        sidecar:
-            dashboards:
-                enabled: true
-                searchNamespace: default
-                waitForGrafana: true
-                folderAnnotation: grafana_folder
-                provider:
-                    foldersFromFilesStructure: true
+prometheus:
+    prometheusSpec:
+        scrapeInterval: 15s
+        serviceMonitorSelector: {}
+        serviceMonitorNamespaceSelector: {}
+        externalUrl: "http://localhost:9090"
+        
+grafana:
+    enabled: true
+    defaultDashboardsEnabled: true
+    service:
+        type: LoadBalancer
+    sidecar:
+        dashboards:
+            enabled: true
+            searchNamespace: default
+            waitForGrafana: true
+            folderAnnotation: grafana_folder
+            provider:
+                foldersFromFilesStructure: true
 
 dcgm-exporter:
     image:
