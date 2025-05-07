@@ -1,0 +1,149 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: llm-monitoring-alert-rules
+  labels:
+    release: llm-monitoring
+spec:
+  groups:
+  - name: llm-monitoring.rules
+    rules:
+      # High p95 latency alert
+      - alert: HighRequestLatency
+        expr: histogram_quantile(0.95, sum(rate(llm_request_latency_seconds_bucket[5m])) by (user_id, model, le)) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High p95 request latency detected"
+          description: "95th percentile latency is above 5 seconds"
+
+      # Slow time to first token
+      - alert: SlowTimeToFirstToken
+        expr: histogram_quantile(0.90, sum(rate(llm_time_to_first_token_seconds_bucket[5m])) by (model, le)) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow time to first token"
+          description: "90th percentile time to first token is above 1 second"
+
+      # High error rate
+      - alert: HighErrorRate
+        expr: sum(rate(llm_error_count[5m])) by (model) / sum(rate(llm_request_count[5m])) by (model) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate exceeds 5%"
+
+      # Specific error type spike
+      - alert: ErrorTypeSpike
+        expr: sum(rate(llm_error_types[5m])) by (error_type, model) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Error type spike detected"
+          description: "Errors are occurring at high rate"
+      
+      # High GPU memory usage
+      - alert: HighGPUMemoryUsage
+        expr: llm_gpu_memory_usage_bytes / (16 * 1024 * 1024 * 1024) > 0.90  # Assuming 16GB GPU
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High GPU memory utilization"
+          description: "GPU memory usage is above 90% for 10 minutes"
+
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: llm_cpu_usage_percent > 90
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU utilization"
+          description: "CPU usage is above 90% for 10 minutes"
+
+      # High RAM usage
+      - alert: HighRAMUsage
+        expr: llm_ram_usage_bytes / (64 * 1024 * 1024 * 1024) > 0.90  # Assuming 64GB RAM
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High RAM utilization"
+          description: "RAM usage is above 90% for 10 minutes"
+
+      # Long queue time
+      - alert: LongQueueTime
+        expr: histogram_quantile(0.95, sum(rate(llm_queue_time_seconds_bucket[5m])) by (le)) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Long queue times detected"
+          description: "95th percentile queue time is above 1 second"
+
+      # Large queue size
+      - alert: LargeQueueSize
+        expr: llm_queue_size > 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Large queue size"
+          description: "Queue size has been above 50 for 5 minutes"
+
+      # Throttling incidents
+      - alert: ThrottlingIncidentsSpike
+        expr: rate(llm_throttling_incidents[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High throttling rate"
+          description: "System is throttling requests at high rate"
+
+      # Rate limit breaches by specific users
+      - alert: UserRateLimitBreaches
+        expr: sum(rate(llm_rate_limit_breaches[5m])) by (user_id) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "User hitting rate limits frequently"
+          description: "User is breaching rate limits frequently"
+
+      # High latency for specific users
+      - alert: UserHighLatency
+        expr: histogram_quantile(0.95, sum(rate(llm_request_latency_seconds_bucket[5m])) by (user_id, le)) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High latency for specific user"
+          description: "User is experiencing high latency (>10s)"
+
+       # Abnormal token generation rate
+      - alert: AbnormalTokenGeneration
+        expr: sum(rate(llm_tokens_generated_total[1h])) by (model) / sum(rate(llm_tokens_generated_total[24h] offset 1d)) by (model) > 1.5
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Abnormal token generation rate"
+          description: "Token generation rate is 50% higher than same time yesterday"
+
+      - alert: TstToggle
+        expr: llm_index_toggle == 1
+        labels:
+          severity: info
+        annotations:
+          summary: "Index page accessed"
+          description: "The index (health check) page was just accessed. Toggle metric is set to 1."
+
+

@@ -1,0 +1,166 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: llm-error-analytics-dashboard
+    labels:
+        grafana_dashboard: "1"
+data:
+    llm-error-analytics-dashboard.json: |
+        {
+          "uid": "error-analytics-dashboard",
+          "title": "3. Error Analytics",
+          "schemaVersion": 37,
+          "version": 3,
+          "time": { "from": "now-1h", "to": "now" },
+          "refresh": "5s",
+          "tags": ["error"],
+          "templating": {
+            "list": [
+              {
+                "name": "model",
+                "type": "query",
+                "label": "Model",
+                "datasource": "Prometheus",
+                "refresh": 1,
+                "query": "label_values(llm_error_count_total, model)",
+                "multi": true,
+                "includeAll": true,
+                "current": { "text": "All", "value": "$__all" }
+              }
+            ]
+          },
+          "panels": [
+            {
+              "id": 1,
+              "type": "stat",
+              "title": "Total Errors (5m)",
+              "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "errors",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": 0, "color": "green" },
+                      { "value": 10, "color": "yellow" },
+                      { "value": 50, "color": "red" }
+                    ]
+                  }
+                }
+              },
+              "targets": [
+                { "expr": "sum(increase(llm_error_count_total{model=~\"$model\"}[5m]))" }
+              ]
+            },
+            {
+              "id": 2,
+              "type": "stat",
+              "title": "Error Rate",
+              "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percent",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": 0, "color": "green" },
+                      { "value": 1, "color": "yellow" },
+                      { "value": 5, "color": "red" }
+                    ]
+                  }
+                }
+              },
+              "targets": [
+                {
+                  "expr": "sum(rate(llm_error_count_total{model=~\"$model\"}[5m])) / sum(rate(llm_request_count_total{model=~\"$model\"}[5m])) * 100"
+                }
+              ]
+            },
+            {
+              "id": 3,
+              "type": "stat",
+              "title": "Distinct Error Types",
+              "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": 1, "color": "green" },
+                      { "value": 5, "color": "yellow" },
+                      { "value": 10, "color": "red" }
+                    ]
+                  }
+                }
+              },
+              "targets": [
+                {
+                  "expr": "count(count by(error_type)(increase(llm_error_types_total{model=~\"$model\"}[5m])))"
+                }
+              ]
+            },
+            {
+              "id": 4,
+              "type": "timeseries",
+              "title": "Error Rate Over Time",
+              "gridPos": { "x": 0, "y": 4, "w": 12, "h": 6 },
+              "fieldConfig": { "defaults": { "unit": "percent" } },
+              "targets": [
+                {
+                  "expr": "sum(rate(llm_error_count_total{model=~\"$model\"}[1m])) / sum(rate(llm_request_count_total{model=~\"$model\"}[1m])) * 100",
+                  "legendFormat": "{{`{{model}}`}}"
+                }
+              ]
+            },
+            {
+              "id": 5,
+              "type": "timeseries",
+              "title": "Breakdown by Error Type",
+              "gridPos": { "x": 12, "y": 4, "w": 12, "h": 6 },
+              "fieldConfig": { "defaults": { "unit": "errors/s" } },
+              "targets": [
+                {
+                  "expr": "sum(rate(llm_error_types_total{model=~\"$model\"}[5m])) by (error_type)",
+                  "legendFormat": "{{`{{error_type}}`}}"
+                }
+              ]
+            },
+            {
+              "id": 6,
+              "type": "timeseries",
+              "title": "Error Spike Timeline",
+              "gridPos": { "x": 0, "y": 10, "w": 12, "h": 6 },
+              "fieldConfig": { "defaults": { "unit": "errors/s" } },
+              "targets": [
+                {
+                  "expr": "sum(rate(llm_error_count_total{model=~\"$model\"}[1m])) by (model)",
+                  "legendFormat": "{{`{{model}}`}}"
+                }
+              ]
+            },
+            {
+              "id": 7,
+              "type": "table",
+              "title": "Top 10 Error Types (5m)",
+              "gridPos": { "x": 12, "y": 10, "w": 12, "h": 6 },
+              "fieldConfig": { "defaults": {} },
+              "targets": [
+                {
+                  "expr": "topk(10, increase(llm_error_types_total{model=~\"$model\"}[5m]))",
+                  "legendFormat": "{{`{{error_type}}`}}"
+                }
+              ]
+            },
+            {
+              "id": 8,
+              "type": "heatmap",
+              "title": "Error Count Heatmap (5m)",
+              "gridPos": { "x": 0, "y": 16, "w": 24, "h": 8 },
+              "fieldConfig": { "defaults": { "unit": "errors" } },
+              "targets": [
+                { "expr": "sum(increase(llm_error_count_total{model=~\"$model\"}[5m]))" }
+              ]
+            }
+          ]
+        }

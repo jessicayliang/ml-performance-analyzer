@@ -1,0 +1,101 @@
+replicaCount: 1
+
+# This value is taken by default from Terraform
+image:
+    repository: ""
+    tag: ""
+    pullPolicy: Always
+
+service:
+    type: LoadBalancer
+    port: 8000
+
+resources:
+    limits:
+        nvidia.com/gpu: 1
+
+    requests:
+        nvidia.com/gpu: 1
+
+nodeSelector: {}
+tolerations: []
+affinity: []
+
+alertmanager:
+    enabled: true
+    alertmanagerSpec:
+        configSecret: alertmanager-llm-monitoring
+        externalUrl: "http://localhost:9093"
+
+prometheus:
+    prometheusSpec:
+        scrapeInterval: 15s
+        serviceMonitorSelector: {}
+        serviceMonitorNamespaceSelector: {}
+        externalUrl: "http://localhost:9090"
+
+grafana:
+    enabled: true
+    defaultDashboardsEnabled: true
+    service:
+        type: LoadBalancer
+    sidecar:
+        dashboards:
+            enabled: true
+            searchNamespace: default
+            waitForGrafana: true
+
+dcgm-exporter:
+    image:
+        repository: nvcr.io/nvidia/k8s/dcgm-exporter
+        tag: "4.2.0-4.1.0-ubuntu22.04"
+
+    securityContext:
+        privileged: true
+
+    tolerations:
+        - operator: Exists
+
+    nodeSelector:
+        cloud.google.com/gke-accelerator: nvidia-l4
+
+    service:
+        enabled: true
+        type: ClusterIP
+        port: 9400
+        name: metrics
+
+    serviceMonitor:
+        enabled: true
+
+        additionalLabels:
+            release: llm-monitoring
+
+        namespaceSelector:
+            matchNames:
+                - default
+
+        selector:
+            matchLabels:
+                app.kubernetes.io/name: dcgm-exporter
+                app.kubernetes.io/instance: llm-monitoring
+
+        endpoints:
+            - port: metrics
+              path: /metrics
+              interval: 15s
+
+    extraHostVolumes:
+        - name: nvidia-libs
+          hostPath: /home/kubernetes/bin/nvidia/lib64
+
+    extraVolumeMounts:
+        - name: nvidia-libs
+          mountPath: /usr/local/nvidia/lib64
+          readOnly: true
+
+    extraEnv:
+        - name: LD_LIBRARY_PATH
+          value: /usr/local/nvidia/lib64:$LD_LIBRARY_PATH
+
+    priorityClassName: dcgm-exporter

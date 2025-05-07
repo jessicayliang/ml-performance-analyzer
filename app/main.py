@@ -5,11 +5,12 @@ from starlette.responses import Response
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from app.llm_engine import generate_text
 from app.metrics import *
-from app.monitoring import start_metrics_updater, update_resource_metrics
+from app.monitoring import start_metrics_updater
 from app.middleware import queue_simulation_middleware
 from app.throttling import is_throttled
 
-MAX_HISTORY_MESSAGES = 20
+MAX_HISTORY_MESSAGES = 7
+toggle_state = 0
 
 app = FastAPI()
 app.middleware("http")(queue_simulation_middleware)
@@ -20,22 +21,22 @@ chat_histories = {}
 class PromptRequest(BaseModel):
     user_id: str
     prompt: str
+    model: str = "llama"
     max_tokens: int = 256
     temperature: float = 0.7
     top_p: float = 0.95
 
 @app.post("/generate")
 async def generate(request: PromptRequest):
-    start_time = time.time()
-
     try:
-        ttft_start = time.time()
+        start_time = time.time()
 
         user_id = request.user_id
         user_prompt = request.prompt
+        model = request.model
 
         # Check for throttling
-        if is_throttled(user_id):
+        if is_throttled(user_id, model):
             raise HTTPException(status_code=429, detail="Too many requests. Please wait before trying again.")
 
         # Initialize chat history if not present
@@ -53,10 +54,11 @@ async def generate(request: PromptRequest):
             messages=history,
             max_tokens=request.max_tokens,
             temperature=request.temperature,
-            top_p=request.top_p
+            top_p=request.top_p,
+            model=model
         )
 
-        ttft_end = time.time()
+        end_time = time.time()
 
         # Append model's response to the history
         history.append({"role": "assistant", "content": response_text})
@@ -68,21 +70,25 @@ async def generate(request: PromptRequest):
             history = system_prompt + trimmed_history
 
         # Log metrics
-        REQUEST_LATENCY.observe(time.time() - start_time)
-        TIME_TO_FIRST_TOKEN.observe(ttft_end - ttft_start)
-        REQUEST_COUNT.inc()
-        TOKENS_INPUT.inc(len(input_tokens))
-        TOKENS_GENERATED.inc(len(output_tokens))
+        REQUEST_LATENCY.labels(user_id=user_id, model=model).observe(end_time - start_time)
+        REQUEST_COUNT.labels(user_id=user_id, model=model).inc()
+        TOKENS_INPUT.labels(user_id=user_id, model=model).inc(len(input_tokens))
+        TOKENS_GENERATED.labels(user_id=user_id, model=model).inc(len(output_tokens))
         TOKEN_LENGTH_INPUT.observe(len(input_tokens))
         TOKEN_LENGTH_OUTPUT.observe(len(output_tokens))
-
-        update_resource_metrics()
+        if len(output_tokens) != 0:
+            TIME_TO_FIRST_TOKEN.labels(user_id=user_id, model=model).observe((end_time - start_time) / len(output_tokens))  # estimate
 
         return {"output": response_text}
 
+    except HTTPException as http_exc:
+        ERROR_COUNT.labels(user_id=user_id, model=model).inc()
+        ERROR_TYPES.labels(error_type=f"HTTP_{http_exc.status_code}", model=model).inc()
+        raise http_exc
+
     except Exception as e:
-        ERROR_COUNT.inc()
-        ERROR_TYPES.labels(error_type=type(e).__name__).inc()
+        ERROR_COUNT.labels(user_id=user_id, model=model).inc()
+        ERROR_TYPES.labels(error_type=type(e).__name__, model=model).inc()
         raise e
 
 @app.get("/metrics")
@@ -91,6 +97,9 @@ def metrics():
 
 @app.get("/")
 def health():
+    global toggle_state
+    toggle_state = 1 - toggle_state 
+    TST_TOGGLE.set(toggle_state)
     return {"status": "Model is ready"}
 
 start_metrics_updater()
